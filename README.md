@@ -1,4 +1,5 @@
 # OrangeCloudIOSSdk
+
 Welcome to CloudMe project for iPhone, designed to help you test the Orange Cloud APIs.
 This is a preliminary sample code and we are currently developing a fully featured SDK.
 
@@ -11,18 +12,7 @@ and paste them in the relevant section: #warning in ViewController.m.
 We'd love to hear your feedback/comments.
 Thank you in advance for your time.
 
------------------------------------------------------------------------------------------
-Legal notice:
-
-ORANGE OFFERS NO WARRANTY EITHER EXPRESS OR IMPLIED INCLUDING THOSE OF MERCHANTABILITY,
-NONINFRINGEMENT OF THIRD-PARTY INTELLECTUAL PROPERTY OR FITNESS FOR A PARTICULAR PURPOSE.
-ORANGE SHALL NOT BE LIABLE FOR ANY DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION,
-DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION,
-OR OTHER LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE THE SAMPLE CODE,
-EVEN IF ORANGE HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
------------------------------------------------------------------------------------------
-
-Notes re: Xcode project:
+Notes on Xcode project:
 
 This project is compatible with both iOS 7 and iOS 8 versions.
 
