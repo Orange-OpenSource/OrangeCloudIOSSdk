@@ -1,4 +1,4 @@
-# Orange Cloud iOS SSK
+# Orange Cloud iOS SDK
 
 Welcome to the CloudMe project for iPhone, designed to help you test Orange Cloud APIs.
 This is a preliminary sample code: we are currently developing a fully featured SDK.
