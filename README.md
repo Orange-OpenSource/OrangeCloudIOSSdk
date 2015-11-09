@@ -24,9 +24,9 @@ Swift compatibility:
 You can use this SDK using either Objective-C or Swift. An example of
 Swift usage is provided in SwiftTestController.swift. You will just
 need to insert
-''' objective-c
+``` objective-c
 #import "CloudManager.h"
-'''
+```
 in your  bridging header
 
 CloudTestViewController:
