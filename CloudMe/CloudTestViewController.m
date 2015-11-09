@@ -30,15 +30,10 @@
     self.view.backgroundColor = [UIColor whiteColor];
 
     // Create the connection object that will make first user authentication and then open a cloud session
-//#warning - please replace with your own credentials
-    
-//    self.cloudManager = [[CloudManager alloc] initWithAppKey:@"84s1QUs16ZKz0MKMppjxANczFQTfzpwe"
-//                                                   appSecret:@"yrXb1IA1hQqaDHa0"
-//                                                 redirectURI:@"cloudmefull://callback"];
-
-    self.cloudManager = [[CloudManager alloc] initWithAppKey:@"YWrByWAIwwdQuN7i4DrQnD0rlEI0LNpw"
-                                                   appSecret:@"AidRAEmS0SiUGQaR"
-                                                 redirectURI:@"http://www.spikitup.macflymotion.fr/Service/SpikiServices.php/OrangeConnect"];
+#warning - please replace with your own credentials
+    self.cloudManager = [[CloudManager alloc] initWithAppKey:@"your_app_key"
+                                                   appSecret:@"your_app_secret"
+                                                 redirectURI:@"your_app_callback_URI"];
     
     
     

@@ -139,7 +139,7 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
 /** Return whether the url is compatible with the current authent and if so, continue the connection process.
  * It is typically called from AppDelegate application:openURL:sourceApplication:annotation:
  * @param a url that triggered
- * @return YES if the parameter is compatible with teh actual authentication process
+ * @return YES if the parameter is compatible with the actual authentication process
  */
 - (BOOL)handleOpenURL:(NSURL * _Nonnull)url;
 
@@ -155,8 +155,7 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
 
 /** Return the root folder. This is useful when you are in restricted mode and you don't know the root forlder that has been assign to your application.
  * This is typically the first API call after openSession. In the success callback, you may want to call listFolder, for example.
- * @param success a block of code called with the cloud file object representing the root folder.
- * @param failure a block of code called when the request failed with corresponding CloudStatus error
+ * @param result a block of code called with the cloud file object representing the root folder and StatusOK, or nil and the error code if a problem occurred.
  @code
  [[CloudManager sharedInstance] rootFolderWithSuccess:^(CloudItem * cloudItem) {
      // list all files and folders at "root" level
@@ -175,8 +174,7 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
 /** List the content of the root . You must call this method first to be able to access to cloud information. No parameter is returned, rather a bloc of code is called
  * when either the session was successfully open or failed.
  * @param folderCloudItem the cloud item of a folder, previously retrieved from the cloud, with a previous call to this listFolder method. if @c folderID is nil, the root folder is listed.
- * @param success a block of code called with the list of files contained in the folder.
- * @param failure a block of code called when the request failed.
+ * @param result a block of code called with the list of files contained in the folder and StatusOK, or nil and the error code if a problem occurred.
  * @note You probably need to first get the root folder content, using nil as the folderID. Then you can browse recursively the user file tree using.
  */
 - (void)listFolder:(CloudItem* _Nonnull)folderCloudItem result:(ListFolderBlock _Nonnull)result;
@@ -184,32 +182,29 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
 /** Get more information about a file. In particular, the following information is returned: size, creation time, thumbnail and download URL.
  * @note the cloud file object passed to the @i success callback is the one passed as first parameter, with new field values.
  * @param cloudFile an object returned by listFolder.
- * @param success a block of code called with the initial cloud file object augmented with new field values (like size, creation time, thumbnail and download URL).
- * @param failure a block of code called when the request failed.
+ * @param result a block of code called with the initial cloud file object augmented with new field values (like size, creation time, thumbnail and download URL) and StatusOK, or nil and the error code if a problem occurred..
  */
 - (void) fileInfo:(CloudItem * _Nonnull)cloudFile result:(FileInfoBlock _Nonnull)result;
 
 /** Get the available space of the current account.
- * @param success a block of code called with the available free space, in bytes.
- * @param failure a block of code called when the request failed.
+ * @param result a block of code called with the available free space, in bytes and StatusOK, or nil and the error code if a problem occurred.
  */
 - (void) getFreeSpace:(FreeSpaceBlock _Nonnull) result;
 
 /** Fetch the thumbnail data associated with file stored in the cloud. A thumbnail is a small and square graphical (around 144x144) representation of the content data.
  * The data returned in the @i success callback are suitable to be decoded as an image, like below:
 @code
-[CloudManager sharedInstance] getThumbnail:cloudFile success:^(NSData*)data {
- imageView.image = [UIImage imageWidthData:data];
- }
- failure (CloudStatus status) {
- imageView.image = defaultImage;
- }
-];
+[CloudManager sharedInstance] getThumbnail:cloudFile result:^(NSData*data, CloudStatus status) {
+    if (status == StatusOK) {
+        imageView.image = [UIImage imageWidthData:data];
+    } else {
+        imageView.image = defaultImage;
+    }
+ }];
 @endcode
  * @warning the file info must have been retrieved first to be able to call this method.
  * @param cloudFile the cloud file object containing the thumbnail URL.
- * @param success a block of code called with the data associated with the thumbnail.
- * @param failure a block of code called when the request failed.
+ * @param result a block of code called with the data associated with the thumbnail and StatusOK, or nil and the error code if a problem occurred.
  */
 - (void) getThumbnail:(CloudItem * _Nonnull)cloudFile result:(DataBlock _Nonnull)result;
 
@@ -217,18 +212,17 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
  * representation of the content data, suitable to be displayed on a mobile phone screen.
  * The data returned in the @i success callback are suitable to be decoded as an image, like below:
  @code
- [CloudManager sharedInstance] getPreview:cloudFile success:^(NSData*)data {
- imageView.image = [UIImage imageWidthData:data];
- }
- failure (CloudStatus status) {
- imageView.image = defaultImage;
- }
- ];
+ [CloudManager sharedInstance] getPreview:cloudFile success:^(NSData*data, CloudStatus status) {
+    if (status == StatusOK) {
+        imageView.image = [UIImage imageWidthData:data];
+    } else {
+        imageView.image = defaultImage;
+    }
+ }];
  @endcode
  * @warning the file info must have been retrieved first to be able to call this method.
  * @param cloudFile the cloud file object containing the thumbnail URL.
- * @param success a block of code called with the data associated with the preview.
- * @param failure a block of code called when the request failed.
+ * @param success a block of code called with the data associated with the preview and StatusOK, or nil and the error code if a problem occurred.
  */
 - (void) getPreview:(CloudItem * _Nonnull)cloudFile result:(DataBlock _Nonnull)result;
 
@@ -236,26 +230,24 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
  * @note The parent folder identifier is typically retreived with a listFolder call.
  * @param folderName the name of the folder to be created.
  * @param parentCloudItem the cloud item of the folder to be created.
- * @param success a block of code called with the available free space, in bytes.
- * @param failure a block of code called when the request failed.
+ * @param result a block of code called with the new dfolder info and StatusOK, or nil and the error code if a problem occurred.
  */
 - (void) createFolder:(NSString*_Nonnull)folderName parent:(CloudItem*_Nonnull)parentCloudItem result:(FileInfoBlock _Nonnull)result;
 
 /** Retrieve the file content stored in the cloud.
  * The data returned in the @i success callback is the exact content of the file. For instance, if the file is an image, its usage is pretty similar to getThumbnail:
  @code
- [CloudManager sharedInstance] getFileContent:cloudFile success:^(NSData*)data {
- imageView.image = [UIImage imageWidthData:data];
- }
- failure (CloudStatus status) {
- imageView.image = defaultImage;
- }
- ];
+ [CloudManager sharedInstance] getFileContent:cloudFile success:^(NSData*data, CloudStatus status) {
+    if (status == StatusOK) {
+        imageView.image = [UIImage imageWidthData:data];
+    } else {
+        imageView.image = defaultImage;
+    }
+ }];
  @endcode
  * @warning the file info must have been retrieved first to be able to call this method.
  * @param cloudFile the cloud file object containing the download URL.
- * @param success a block of code called with the file content data.
- * @param failure a block of code called when the request failed.
+ * @param result a block of code called with the file content data and StatusOK, or nil and the error code if a problem occurred.
  */
 - (void) getFileContent:(CloudItem * _Nonnull)cloudFile result:(DataBlock _Nonnull)result;
 
@@ -264,22 +256,19 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
  * @param filename the name of file that will be created and that will contain data.
  * @param folderID the identifier of the folder that will contain the newly created file (typically destinationCloudItem.identifier).
  * @param progress a block of code called whenever a chunk of data has been uploaded. The parameter is teh download percentage, from 0 to 1.
- * @param success a block of code called when data has been succesfully uploaded.
- * @param failure a block of code called when the upload failed.
+ * @param result a block of code called when data has been succesfully uploaded or when a problem occurred.
  */
 - (void) uploadData:(NSData*_Nonnull)data filename:(NSString*_Nonnull)filename folderID:(NSString*_Nonnull)folderID progress:(ProgressBlock _Nonnull)progress result:(FileInfoBlock _Nonnull)result;
 
 /** Delete a folder and all its files and subfolders. You should really pay attention when calling this method as files will be permanentely deleted.
  * @param folderCloudItem the cloudItem of the folder that is to be deleted.
- * @param success a block of code called when folder has been succesfully deleted.
- * @param failure a block of code called when the deletion failed.
+ * @param result a block of code called when folder has been succesfully deleted or when a problem occurred.
  */
 - (void) deleteFolder:(CloudItem * _Nonnull)folderCloudItem result:(ResultBlock _Nonnull)result;
 
 /** Delete permanentely a single file.
  * @param fileCloudItem the cloudItem of the folder that is to be deleted.
- * @param success a block of code called when file has been succesfully deleted.
- * @param failure a block of code called when the deletion failed.
+ * @param result a block of code called when file has been succesfully deleted or when a problem occurred.
  */
 - (void) deleteFile:(CloudItem * _Nonnull)fileCloudItem result:(ResultBlock _Nonnull)result;
 

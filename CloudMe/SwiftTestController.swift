@@ -17,22 +17,22 @@ class SwiftTestController : UINavigationController {
     override func viewDidLoad() {
         super.viewDidLoad ()
         view.backgroundColor = UIColor.whiteColor()
+
         // Create the cloud manager object that will make first user authentication and then open a cloud connection
-        cloudManager = CloudManager (appKey: "84s1QUs16ZKz0MKMppjxANczFQTfzpwe", appSecret: "yrXb1IA1hQqaDHa0", redirectURI: "cloudmefull://callback")
-        cloudManager?.setUseWebView(true)
-        cloudManager?.setForceLogin(true)
-        cloudManager?.addScope(.FullRead)
+        cloudManager = CloudManager (appKey: "your_app_key", appSecret: "your_app_secret", redirectURI: "your_app_callback_URI")
+        cloudManager?.setUseWebView(true) // force using a webview instead of safari
+        cloudManager?.setForceLogin(true) // will ask user to enter its login each time (i.e. no password caching)
+        cloudManager?.addScope(.FullRead) // require to use this new scope
     }
 
-    /** Convenient method for AppDelegate to tell the cloud manager to connect to the cloud.
+    /** Convenient method for AppDelegate to ask the cloud manager to connect to the cloud.
      * This method is typically called from the app delegate when the app becomes active or whenever a connection must be re-established (i.e. after a logout)
-     * It will first check that user is authenticated using the right mechanism (refresh_toke, web view or external browser), then open a cloud session.
+     * It will first check that user is authenticated using the right mechanism (refresh_token, web view or external browser), then open a cloud session.
      * Normally, once the session is open, any cloud method can be used.
      */
 
     func connect () {
         if let cloudManager = cloudManager where cloudManager.isConnected == false {
-            print ("let's open a session !")
             cloudManager.openSessionFrom(self) { status in
                 if status == StatusOK {
                     cloudManager.rootFolder { cloudItem, status in
@@ -56,7 +56,7 @@ class SwiftTestController : UINavigationController {
         }
     }
     
-    /** convenient method for AppDelegate to inform the cloud manager it needs to logout the current user */
+    /** convenient method (for AppDelegate) to inform the cloud manager it needs to logout the current user */
     func logout () {
         cloudManager?.logout() // close current session
         setViewControllers ([], animated:true) // remove current controllers
