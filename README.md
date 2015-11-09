@@ -15,19 +15,39 @@ Notes on Xcode project:
 ----------
 This project is compatible with both iOS 8 and iOS 9 versions.
 
+**Warning**: in order to be able to use this project, you must first
+creat your application key, secret and callback url on
+[Orange Partner](https://www.orangepartner.com) and set them in
+CloudTestViewController or SwiftTestController (see below)
+
 The Cloud API can be accessed using conventional HTTP calls, however this Objective-C project
 provides a set of classes that remove the burden of making your own calls.
 These classes are used to implement a simple navigation application to illustrate their usage.
 
 Swift compatibility:
 -----------
-You can use this SDK using either Objective-C or Swift. An example of
+You can use this SDK using either Objective-C or **Swift**. An example of
 Swift usage is provided in SwiftTestController.swift. You will just
 need to insert
-``` objective-c
-#import "CloudManager.h"
+
+```Objective-c
+ #import "CloudManager.h"
 ```
-in your  bridging header
+in your bridging header.
+
+The SDK has been rewritten in order to take advantage of Swift
+syntaxic shortcut, in particular the closure as the last parameter,
+allowing to write code like : 
+
+```Swift
+cloudManager.rootFolder { cloudItem, status in
+    if status == StatusOK {
+        self.setViewControllers([FileListViewController (manager: cloudManager, item: cloudItem)], animated: true)
+    } else {
+        print ("Error while getting root folder: \(CloudManager.statusString (status))")
+    }
+}
+```
 
 CloudTestViewController:
 ---------------
@@ -36,15 +56,22 @@ This is where you set your application credentials (client id, secret and redire
 This is also the place where you trigger user authentication and then, through a callback,
 start using the cloud.
 
+SwiftTestController:
+--------------
+A swift class that does exactly the same as its objective-c counterpart
+(CloudTestViewController). To use this Swift class, just make sure the
+`USE_SWIFT` #define in AppDelegate is not commented out (line #22)
 
 CloudManager:
 -------------
 This class gives you access to the Cloud functionalities : user authentication, list of available files,
 detailed info on a file, upload and download of content.
-You  typically start by creating a CloudSession instance with your appp credentials and open it using your main view controller.
-Once the session is open, you can access the user Cloud data.
-Due to the asynchronous nature inherent to HTTP calls, this API uses blocks.
-You should be never blocked by a call but remember that all UI modifications
+You  typically start by creating a CloudManager instance with your appp credentials and open it using your main view controller.
+Once the session is open, you can access the user cloud data.
+
+Due to the asynchronous nature inherent to HTTP calls, this API uses
+blocks / closures.
+Therefore, you should be never blocked by a call but remember that all UI modifications
 must be done back to the main loop.
 
 CloudItem:
