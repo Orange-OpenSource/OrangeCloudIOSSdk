@@ -16,7 +16,7 @@
 
 
 #import <UIKit/UIKit.h>
-#import "CloudSession.h"
+#import "CloudManager.h"
 
 
 /** This controller contains all the logic to connect to the Orange Cloud
@@ -24,7 +24,7 @@
 @interface CloudTestViewController : UINavigationController
 
 /** the cloud session object used to access Orange Cloud */
-@property (nonatomic) CloudSession * cloudSession;
+@property (nonatomic) CloudManager * cloudManager;
 
 /** convenient method for AppDelegate to tell the cloud session to connect to the cloud */
 - (void) connect;

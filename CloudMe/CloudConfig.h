@@ -15,7 +15,7 @@
  */
 
 /** set to YES if you want to have traces output with a curl syntax. Warning: can be verbose, use it only when you have issues */
-#define TRACE_API_CALL NO
+#define TRACE_API_CALL YES
 
 /** set to YES if you want bandwidth usage stats. Warning: can be verbose, use it only when you have issues */
 #define TRACE_BANDWIDTH_USAGE NO

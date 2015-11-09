@@ -60,6 +60,8 @@ static NSString * kAuthenticationRevoked = @"authenticationRevokedKey";
 // flag to avoid trying to reconnect when coming back from safari
 @property (nonatomic) BOOL connectingExternally;
 
+/** a space separated list of rights to be granted by the user. This is build by teh addCope method */
+@property (nonatomic) GrantScope scopes;
 
 @end
 
@@ -67,9 +69,9 @@ static NSString * kAuthenticationRevoked = @"authenticationRevokedKey";
 @implementation OIDCManager
 
 
-- (void) setScope:(NSString *)scope {
-    _scope = [@"openid " stringByAppendingString:scope];
-}
+//- (void) setScope:(NSString *)scope {
+//    _scope = [@"openid+" stringByAppendingString:scope];
+//}
 
 - (id)initWithAppKey:(NSString *)appKey appSecret:(NSString *)appSecret redirectURI:(NSString *)redirectURI {
     self = [super initWithNibName:nil bundle:nil];
@@ -81,7 +83,7 @@ static NSString * kAuthenticationRevoked = @"authenticationRevokedKey";
         self.authentServer = @"https://api.orange.com";  // prod
         self.authentEndpoint = @"/oauth/v2/authorize";
         self.tokenEndpoint = @"/oauth/v2/token";
-        self.scope = @"openid+cloud";
+        self.scopes = GrantScopeOpenID;
         self.response_type = @"code";
         self.state = @"state";
 
@@ -96,6 +98,27 @@ static NSString * kAuthenticationRevoked = @"authenticationRevokedKey";
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor =  [UIColor whiteColor];
+}
+
+- (void) addScope:(GrantScope)scope {
+    self.scopes |= scope;
+}
+
+- (NSString*) stringFromScopes {
+    NSString * result = @"openid";
+    if ((self.scopes & GrantScopeCloud) != 0) {
+        result = [result stringByAppendingString:@"+cloud"];
+    }
+    if ((self.scopes & GrantScopeUserDetails) != 0) {
+        result = [result stringByAppendingString:@"+details"];
+    }
+    if ((self.scopes & GrantScopeOfflineAcess) != 0) {
+        result = [result stringByAppendingString:@"+offline_access"];
+    }
+    if ((self.scopes & GrantScopeFullRead) != 0) {
+        result = [result stringByAppendingString:@"+cloudfullread"];
+    }
+    return result;
 }
 
 /** Build the URL string used to start the authentication process by appending all needed parameters to the server name end end point.
@@ -120,10 +143,10 @@ static NSString * kAuthenticationRevoked = @"authenticationRevokedKey";
         self.prompt = @"none";
     }
     if (self.useRefreshToken && self.refreshToken == nil) {
-        self.scope = @"openid+cloud+offline_access";
+        [self addScope:GrantScopeOfflineAcess];
     }
     NSString * urlString = [NSString stringWithFormat:@"%@%@?", self.authentServer, self.authentEndpoint]; // create the full url like http://server/path?
-    urlString = [urlString stringByAppendingFormat:@"scope=%@", self.scope];
+    urlString = [urlString stringByAppendingFormat:@"scope=%@", [self stringFromScopes]];
     urlString = [urlString stringByAppendingFormat:@"&response_type=%@", self.response_type];
     urlString = [urlString stringByAppendingFormat:@"&client_id=%@", self.client_id];
     urlString = [urlString stringByAppendingFormat:@"&prompt=%@", self.prompt];
@@ -145,6 +168,7 @@ NSString* encodeToPercentEscapeString(NSString *string) {
 - (void) authenticateFrom:(UIViewController*)parentController completion:(AuthenticationCompletion)completion {
     // if the case below is true, that means that we try to reconnect while coming back from safari and thus we should just ignore
     // this call as the process will continue in handleURL, but we have to unset it for next time
+    NSLog (@"authenticateFrom %@", parentController);
     if (self.connectingExternally) {
         self.connectingExternally = NO;
         return;
@@ -176,6 +200,7 @@ NSString* encodeToPercentEscapeString(NSString *string) {
  */
 
 - (void) displayLoginFrom:(UIViewController*)parentController completion:(AuthenticationCompletion)completion {
+    NSLog (@"displayLoginFrom inwebview: %d", self.forceAuthentInWebView);
     asyncCompletion = completion; // record the block to call back when asynchronous login is done
     if (self.forceAuthentInWebView || [self.redirect_uri hasPrefix:@"http://"] || [self.redirect_uri hasPrefix:@"https://"]) {
         NSURLRequest * request = [NSURLRequest requestWithURL:[NSURL URLWithString:[self createAuthenticationUrlStringWithConsent:YES]]];

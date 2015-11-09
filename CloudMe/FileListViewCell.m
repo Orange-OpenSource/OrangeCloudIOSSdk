@@ -16,7 +16,7 @@
 
 
 #import "FileListViewCell.h"
-#import "CloudSession.h"
+#import "CloudManager.h"
 
 @interface FileListViewCell ()
 @property (nonatomic) UILabel * name;
@@ -94,11 +94,13 @@
 
 - (void) getThumbnail:(CloudItem*)cloudFile {
     if (cloudFile.thumbnail == nil) {
-        [self.session getThumbnail:cloudFile success:^(NSData * data) {
-            [self setIconFor:cloudFile withData:data];
-        } failure:^(CloudStatus status) {
-            //NSLog (@"Cannot load thumbnail, using default icon");
-            [self setIconFor:cloudFile withData:nil];
+        [self.cloudManager getThumbnail:cloudFile result:^(NSData * data, CloudStatus status) {
+            if (status == StatusOK) {
+                [self setIconFor:cloudFile withData:data];
+            } else {
+                //NSLog (@"Cannot load thumbnail, using default icon");
+                [self setIconFor:cloudFile withData:nil];
+            }
         }];
     } else {
         self.thumbnail.image = cloudFile.thumbnail;
@@ -137,10 +139,12 @@
     self.size.hidden = YES;
     self.thumbnail.image = nil;
     if (cloudItem.extraInfoAvailable == NO) {
-        [self.session fileInfo:cloudItem success:^(CloudItem * cloudFile) {
-            [self updateCellInfo:cloudFile];
-        } failure:^(CloudStatus status) {
-            [self setIconFor:cloudItem withData:nil];
+        [self.cloudManager fileInfo:cloudItem result:^(CloudItem * cloudFile, CloudStatus status ) {
+            if (status == StatusOK) {
+                [self updateCellInfo:cloudFile];
+            } else {
+                [self setIconFor:cloudItem withData:nil];
+            }
         }];
     } else {
         [self updateCellInfo:cloudItem];

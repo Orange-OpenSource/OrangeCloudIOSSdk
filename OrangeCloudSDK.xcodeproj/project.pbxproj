@@ -41,10 +41,11 @@
 		E291ED5A1A13D28700A552D6 /* LS_Spinner@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E291ED461A13D28700A552D6 /* LS_Spinner@2x.png */; };
 		E291ED5B1A13D28700A552D6 /* LS_Upload@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E291ED471A13D28700A552D6 /* LS_Upload@2x.png */; };
 		E291ED5C1A13D28700A552D6 /* LS_Video@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E291ED481A13D28700A552D6 /* LS_Video@2x.png */; };
+		E2C36E971BEA4DA800B9D2C6 /* SwiftTestController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2C36E961BEA4DA800B9D2C6 /* SwiftTestController.swift */; };
 		E2E23E271A07DD3600F79394 /* OIDCManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E2E23E1E1A07DD3600F79394 /* OIDCManager.m */; };
 		E2E23E281A07DD3600F79394 /* CloudItem.m in Sources */ = {isa = PBXBuildFile; fileRef = E2E23E211A07DD3600F79394 /* CloudItem.m */; };
 		E2E23E291A07DD3600F79394 /* CloudConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = E2E23E231A07DD3600F79394 /* CloudConnection.m */; };
-		E2E23E2A1A07DD3600F79394 /* CloudSession.m in Sources */ = {isa = PBXBuildFile; fileRef = E2E23E251A07DD3600F79394 /* CloudSession.m */; };
+		E2E23E2A1A07DD3600F79394 /* CloudManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E2E23E251A07DD3600F79394 /* CloudManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -91,6 +92,8 @@
 		E291ED461A13D28700A552D6 /* LS_Spinner@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "LS_Spinner@2x.png"; sourceTree = "<group>"; };
 		E291ED471A13D28700A552D6 /* LS_Upload@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "LS_Upload@2x.png"; sourceTree = "<group>"; };
 		E291ED481A13D28700A552D6 /* LS_Video@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "LS_Video@2x.png"; sourceTree = "<group>"; };
+		E2C36E951BEA4DA800B9D2C6 /* OrangeCloudSDK-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OrangeCloudSDK-Bridging-Header.h"; sourceTree = "<group>"; };
+		E2C36E961BEA4DA800B9D2C6 /* SwiftTestController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftTestController.swift; sourceTree = "<group>"; };
 		E2E23E1D1A07DD3600F79394 /* OIDCManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OIDCManager.h; sourceTree = "<group>"; };
 		E2E23E1E1A07DD3600F79394 /* OIDCManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OIDCManager.m; sourceTree = "<group>"; };
 		E2E23E1F1A07DD3600F79394 /* CloudConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudConfig.h; sourceTree = "<group>"; };
@@ -98,8 +101,8 @@
 		E2E23E211A07DD3600F79394 /* CloudItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CloudItem.m; sourceTree = "<group>"; };
 		E2E23E221A07DD3600F79394 /* CloudConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudConnection.h; sourceTree = "<group>"; };
 		E2E23E231A07DD3600F79394 /* CloudConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CloudConnection.m; sourceTree = "<group>"; };
-		E2E23E241A07DD3600F79394 /* CloudSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudSession.h; sourceTree = "<group>"; };
-		E2E23E251A07DD3600F79394 /* CloudSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CloudSession.m; sourceTree = "<group>"; };
+		E2E23E241A07DD3600F79394 /* CloudManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudManager.h; sourceTree = "<group>"; };
+		E2E23E251A07DD3600F79394 /* CloudManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CloudManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +154,8 @@
 				E22A8300194AF34000A4C8F9 /* images */,
 				E22A82B9194AF24600A4C8F9 /* AppDelegate.h */,
 				E22A82BA194AF24600A4C8F9 /* AppDelegate.m */,
+				E2C36E951BEA4DA800B9D2C6 /* OrangeCloudSDK-Bridging-Header.h */,
+				E2C36E961BEA4DA800B9D2C6 /* SwiftTestController.swift */,
 				E22A82D9194AF2AE00A4C8F9 /* CloudTestViewController.h */,
 				E22A82DA194AF2AE00A4C8F9 /* CloudTestViewController.m */,
 				E22A82E5194AF2C800A4C8F9 /* Navigation */,
@@ -191,7 +196,7 @@
 			children = (
 				E2E23E2B1A07DD4200F79394 /* Cloud utils */,
 				E2E23E201A07DD3600F79394 /* CloudItem.h */,
-				E2E23E241A07DD3600F79394 /* CloudSession.h */,
+				E2E23E241A07DD3600F79394 /* CloudManager.h */,
 			);
 			name = "Cloud API";
 			sourceTree = "<group>";
@@ -234,7 +239,7 @@
 				E2E23E221A07DD3600F79394 /* CloudConnection.h */,
 				E2E23E231A07DD3600F79394 /* CloudConnection.m */,
 				E2E23E211A07DD3600F79394 /* CloudItem.m */,
-				E2E23E251A07DD3600F79394 /* CloudSession.m */,
+				E2E23E251A07DD3600F79394 /* CloudManager.m */,
 			);
 			name = "Cloud utils";
 			sourceTree = "<group>";
@@ -265,7 +270,8 @@
 		E22A829F194AF24600A4C8F9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0510;
+				LastSwiftUpdateCheck = 0710;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = renaud;
 				TargetAttributes = {
 					E22A82A6194AF24600A4C8F9 = {
@@ -337,7 +343,8 @@
 				E22A82DB194AF2AE00A4C8F9 /* CloudTestViewController.m in Sources */,
 				E2E23E271A07DD3600F79394 /* OIDCManager.m in Sources */,
 				E22A82BB194AF24600A4C8F9 /* AppDelegate.m in Sources */,
-				E2E23E2A1A07DD3600F79394 /* CloudSession.m in Sources */,
+				E2C36E971BEA4DA800B9D2C6 /* SwiftTestController.swift in Sources */,
+				E2E23E2A1A07DD3600F79394 /* CloudManager.m in Sources */,
 				E22A82B7194AF24600A4C8F9 /* main.m in Sources */,
 				E2E23E291A07DD3600F79394 /* CloudConnection.m in Sources */,
 			);
@@ -375,6 +382,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -389,7 +397,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -422,7 +430,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -434,14 +442,19 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "CloudMe/OrangeCloudSDK-Prefix.pch";
 				INFOPLIST_FILE = "CloudMe/OrangeCloudSDK-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "net.mobixel.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = OrangeCloudSDK;
 				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "CloudMe/OrangeCloudSDK-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -452,14 +465,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "CloudMe/OrangeCloudSDK-Prefix.pch";
 				INFOPLIST_FILE = "CloudMe/OrangeCloudSDK-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "net.mobixel.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = OrangeCloudSDK;
 				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "CloudMe/OrangeCloudSDK-Bridging-Header.h";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};

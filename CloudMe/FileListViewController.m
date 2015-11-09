@@ -80,14 +80,14 @@
 @end
 @interface FileListViewController () <UITableViewDataSource, UIAlertViewDelegate, UITableViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
-@property (nonatomic) CloudSession * session; // the cloud session to use
+@property (nonatomic) CloudManager * cloudManager; // the cloud session to use
 @property (nonatomic) CloudItem * cloudItem;
 
 
 @property (nonatomic) ProgressView * uploadProgressView;
 
 @property (nonatomic) NSArray * entries;
-@property (nonatomic) UIRefreshControl * refreshControl;
+//@property (nonatomic) UIRefreshControl * refreshControl;
 @property (nonatomic) UIActivityIndicatorView * indicator;
 @property (nonatomic) UIAlertView * createDirAlert;
 @property (nonatomic) UIAlertView * deleteDirAlert;
@@ -98,11 +98,11 @@
 
 @implementation FileListViewController
 
-- (id) initWithSession:(CloudSession*)session item:(CloudItem*)cloudItem {
+- (id) initWithManager:(CloudManager*)manager item:(CloudItem*)cloudItem {
     self = [super initWithStyle:UITableViewStylePlain];
     if (self != nil) {
         self.cloudItem = cloudItem;
-        self.session = session;
+        self.cloudManager = manager;
         if (cloudItem.identifier) {
             self.title = [self title:cloudItem.identifier];
         }
@@ -143,10 +143,10 @@
     UIBarButtonItem * createDir = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStylePlain target:self action:@selector(createDir:)];
     
     image = [[UIImage imageNamed:@"LS_DeleteDir"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
-    UIBarButtonItem * deleteDir = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStyleBordered target:self action:@selector(deleteDir:)];
+    UIBarButtonItem * deleteDir = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStylePlain target:self action:@selector(deleteDir:)];
     
     image = [[UIImage imageNamed:@"LS_More"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
-    UIBarButtonItem * more = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStyleBordered target:self action:@selector(more:)];
+    UIBarButtonItem * more = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStylePlain target:self action:@selector(more:)];
 
     
     
@@ -207,20 +207,22 @@
 
 - (void) loadContent {
     [self.indicator startAnimating];
-    [self.session listFolder:self.cloudItem success:^(NSArray * array) {
-        if (self.refreshControl.isRefreshing) {
-            [self.refreshControl endRefreshing];
+    [self.cloudManager listFolder:self.cloudItem result:^(NSArray * array, CloudStatus status) {
+        if (status == StatusOK) {
+            if (self.refreshControl.isRefreshing) {
+                [self.refreshControl endRefreshing];
+            }
+            self.entries = array;
+            [self.tableView reloadData];
+            [self.indicator stopAnimating];
+        } else {
+            if (self.refreshControl.isRefreshing) {
+                [self.refreshControl endRefreshing];
+            }
+            self.entries = nil;
+            [self.tableView reloadData];
+            [self.indicator stopAnimating];
         }
-        self.entries = array;
-        [self.tableView reloadData];
-        [self.indicator stopAnimating];
-    } failure:^(CloudStatus error) {
-        if (self.refreshControl.isRefreshing) {
-            [self.refreshControl endRefreshing];
-        }
-        self.entries = nil;
-        [self.tableView reloadData];
-        [self.indicator stopAnimating];
     }];
 }
 
@@ -238,7 +240,7 @@
 	if (cell == nil) {
 		cell = [[FileListViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:kCellID];
 	}
-    cell.session = self.session;
+    cell.cloudManager = self.cloudManager;
     cell.cloudItem = (CloudItem*) self.entries[indexPath.row];
     return cell;
 }
@@ -246,10 +248,10 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     CloudItem * item = (CloudItem*) self.entries[indexPath.row];
     if (item.isDirectory) {
-        [self.navigationController pushViewController:[[FileListViewController alloc] initWithSession:self.session item:item] animated:YES];
+        [self.navigationController pushViewController:[[FileListViewController alloc] initWithManager:self.cloudManager item:item] animated:YES];
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
     } else {
-        [self.navigationController pushViewController:[[ImageViewController alloc] initWithSession:self.session item:item] animated:YES];
+        [self.navigationController pushViewController:[[ImageViewController alloc] initWithManager:self.cloudManager item:item] animated:YES];
     }
 }
 
@@ -262,29 +264,33 @@
     if (alertView == self.createDirAlert) {
         if (buttonIndex == 1) {
             NSString * name = [alertView textFieldAtIndex:0].text;
-            [self.session createFolder:name parent:self.cloudItem success:^(CloudItem * item) {
-                self.entries = nil;
-                [self loadContent];
-            } failure:^(CloudStatus status) {
-            NSLog (@"***** Cannot create directory %@", name);
+            [self.cloudManager createFolder:name parent:self.cloudItem result:^(CloudItem * item, CloudStatus status) {
+                if (status == StatusOK) {
+                    self.entries = nil;
+                    [self loadContent];
+                } else {
+                    NSLog (@"***** Cannot create directory %@", name);
+                }
             }];
         }
     } else if (alertView == self.deleteDirAlert) {
         if (buttonIndex == 1) {
-            [self.session deleteFolder:self.cloudItem success:^{
-                NSArray * viewControllers = self.navigationController.viewControllers;
-                NSInteger index = [viewControllers indexOfObject:self];
-                if (index != NSNotFound && index > 0) {
-                    UIViewController * previousController = viewControllers[index-1];
-                    if ([previousController isKindOfClass:[FileListViewController class]]) {
-                        [(FileListViewController*)previousController loadContent];
-                    } else {
-                        [self loadContent];
+            [self.cloudManager deleteFolder:self.cloudItem result:^(CloudStatus status){
+                if (status == StatusOK) {
+                    NSArray * viewControllers = self.navigationController.viewControllers;
+                    NSInteger index = [viewControllers indexOfObject:self];
+                    if (index != NSNotFound && index > 0) {
+                        UIViewController * previousController = viewControllers[index-1];
+                        if ([previousController isKindOfClass:[FileListViewController class]]) {
+                            [(FileListViewController*)previousController loadContent];
+                        } else {
+                            [self loadContent];
+                        }
                     }
+                    [self.navigationController popViewControllerAnimated:YES];
+                } else {
+                    NSLog (@"***** Cannot delete directory %@", self.title);
                 }
-                [self.navigationController popViewControllerAnimated:YES];
-            } failure:^(CloudStatus status) {
-                NSLog (@"***** Cannot delete directory %@", self.title);
             }];
         }
     } else if (alertView == self.logoutAlert) {
@@ -330,12 +336,14 @@
 - (void) showInfo {
     // an example of how to query for available cloud space
 
-    [self.session getFreeSpace:^(long size) {
-        NSString * message = [NSString stringWithFormat:@"You have %d kB of free space", (int)(size/1024)];
-        [self showAlertWithTitle:@"Free Space" message:message];
-    } failure:^(CloudStatus status) {
-        NSString * message = [NSString stringWithFormat:@"Error while getting free space: %@", [CloudSession statusString:status]];
-        [self showAlertWithTitle:@"Free Space" message:message];
+    [self.cloudManager getFreeSpace:^(long size, CloudStatus status) {
+        if (status == StatusOK) {
+            NSString * message = [NSString stringWithFormat:@"You have %d kB of free space", (int)(size/1024)];
+            [self showAlertWithTitle:@"Free Space" message:message];
+        } else {
+            NSString * message = [NSString stringWithFormat:@"Error while getting free space: %@", [CloudManager statusString:status]];
+            [self showAlertWithTitle:@"Free Space" message:message];
+        }
     }];
     [NSThread sleepForTimeInterval:0.1];
 
@@ -395,20 +403,21 @@
                        NSString * filename = defaultRepresentation.filename;
                        [self showProgressIndicator];
                        
-                       [self.session uploadData:data filename:filename folderID:self.cloudItem.identifier progress:^(float progress) {
+                       [self.cloudManager uploadData:data filename:filename folderID:self.cloudItem.identifier progress:^(float progress) {
                            self.uploadProgressView.progress = progress;
-                       } success:^(CloudItem * item) {
-                           self.entries = nil;
-                           self.uploadProgressView.hidden = YES;
-                           [self loadContent];
-
-                       } failure:^(CloudStatus status) {
-                           self.uploadProgressView.hidden = YES;
-                           NSString * message = [NSString stringWithFormat:@"Problem uploading image: %@", [CloudSession statusString:status]];
-                           UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Uploading failed" message:message delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-                           [alert show];
-
-                           NSLog (@"Probleme uploading image: %@", [CloudSession statusString:status]);
+                       } result:^(CloudItem * item, CloudStatus status) {
+                           if (status == StatusOK) {
+                               self.entries = nil;
+                               self.uploadProgressView.hidden = YES;
+                               [self loadContent];
+                           } else {
+                               self.uploadProgressView.hidden = YES;
+                               NSString * message = [NSString stringWithFormat:@"Problem uploading image: %@", [CloudManager statusString:status]];
+                               UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Uploading failed" message:message delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                               [alert show];
+                               
+                               NSLog (@"Probleme uploading image: %@", [CloudManager statusString:status]);
+                           }
                        }];
                    }
      

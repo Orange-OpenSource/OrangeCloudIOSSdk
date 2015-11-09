@@ -16,13 +16,13 @@
 
 
 #import <UIKit/UIKit.h>
-#import "CloudSession.h"
+#import "CloudManager.h"
 
 /** This class displays a cloud item inside a table listing all files in a folder. The exact representation of the cell will depend on the cloud item taht will be assigned */
 @interface FileListViewCell : UITableViewCell
 
 /** the cloud session to use to retrieve thumbnails */
-@property (nonatomic) CloudSession * session;
+@property (nonatomic) CloudManager * cloudManager;
 
 /** the cloud item to display */
 @property (nonatomic) CloudItem * cloudItem;

@@ -15,7 +15,7 @@
  */
 
 #import <UIKit/UIKit.h>
-#import "CloudSession.h"
+#import "CloudManager.h"
 
 /** This class simply display an image downloaded from the cloud*/
 
@@ -24,6 +24,6 @@
 /** Initialize the controller with the current cloud session and the cloud item to display. 
  * @warning the cloud item must be of type Image 
  */
-- (id) initWithSession:(CloudSession*)session item:(CloudItem*)cloudItem;
+- (id) initWithManager:(CloudManager*)cloudManager item:(CloudItem*)cloudItem;
 
 @end

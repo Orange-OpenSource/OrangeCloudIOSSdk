@@ -58,9 +58,14 @@ typedef void (^AuthenticationCheck)(NSString * authorizationCode);
 @interface OIDCManager : UIViewController
 
 
-/** a space separated list of rights to be granted by the user. Default value is empty string, so you MUST provide teh rights you want to use for your application.
- * You probably have to check the documentation of the API you want to use hereafter to see what to specify here. Ex: @"cloud_read cloud_write" for Cloud data access */
-@property (nonatomic) NSString * scope;
+/** Add a scope (i.e. feature) to the list of permissions the user must grant access.
+ * The defaut scope is OpenID  to enable connection with user login/password. You must add all scopes relevant for your application 
+ * and you will probably need to check the documentation of teh API you have registered to.
+ * @warning this method must be called before authenticateFrom:
+ * @see GrantScope
+ * @param scope the new scope to be added in the grant list
+ */
+- (void) addScope:(GrantScope)scope;
 
 /** if set to YES, the login screen is forced to be displayed even if user is already logged in. Default value is NO. */
 @property (nonatomic) BOOL forceLogin;

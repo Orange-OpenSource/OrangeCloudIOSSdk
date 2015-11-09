@@ -16,7 +16,7 @@
 
 
 #import <Foundation/Foundation.h>
-#import "CloudSession.h"
+#import "CloudManager.h"
 
 /** This controller is in charge of displaying the list of all entries of a cloud folder*/
 @interface FileListViewController : UITableViewController <UIActionSheetDelegate>
@@ -24,7 +24,7 @@
 /** Initialize the controller with the current cloud session and the cloud item to list entries.
  * @warning the cloud item must be of type folder
  */
-- (id) initWithSession:(CloudSession*)session item:(CloudItem*)cloudItem;
+- (id) initWithManager:(CloudManager*)manager item:(CloudItem*)cloudItem;
 
 /** refresh folder content */
 - (void) loadContent;

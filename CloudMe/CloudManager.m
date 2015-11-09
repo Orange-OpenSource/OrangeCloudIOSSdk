@@ -15,13 +15,24 @@
  */
 
 
-#import "CloudSession.h"
+#import "CloudManager.h"
 #import "CloudItem.h"
 #import "CloudConnection.h"
 #import <Foundation/NSURLError.h>
 #import "OIDCManager.h"
 
-@interface CloudSession ()
+@implementation CloudError
+- (id) initWithStatus:(CloudStatus)status {
+    self = [super init];
+    if (self) {
+        self.status = status;
+    }
+    return self;
+}
+@end
+
+
+@interface CloudManager ()
 
 // the OpenID Connect manager to delagete use authentication to
 @property (nonatomic) OIDCManager * oidcManager;
@@ -49,9 +60,9 @@
 typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError * error);
 
 
-@implementation CloudSession
+@implementation CloudManager
 
-+ (CloudSession*)sharedInstance {
++ (CloudManager*)sharedInstance {
     static dispatch_once_t once;
     static id sharedInstance;
     dispatch_once(&once, ^{
@@ -126,6 +137,7 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
         
         // create the authent manager
         self.oidcManager = [[OIDCManager alloc] initWithAppKey:appKey appSecret:appSecret redirectURI:redirectURI];
+        [self.oidcManager addScope:GrantScopeCloud];
         
     }
     return self;
@@ -307,12 +319,12 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
     [CloudConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] message:TRACE_BANDWIDTH_USAGE ? info : nil progressHandler:progressHandler completionHandler:completionHandler];
 }
 
-- (void) openSessionFrom:(UIViewController*) parentController success:(SuccessBlock)success failure:(FailureBlock)failure {
+- (void) openSessionFrom:(UIViewController*) parentController result:(ResultBlock)result {
     [self.oidcManager authenticateFrom:parentController completion:^(CloudStatus status, NSString *token, NSTimeInterval duration) {
         if (status == AuthenticationOK) {
-            [self openSessionWithToken:token success:success failure:failure];
+            [self openSessionWithToken:token result:result];
         } else {
-            failure(status);
+            result(status);
         }
     }];
 
@@ -342,7 +354,11 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
     self.oidcManager.forceAuthentInWebView = useWebView;
 }
 
-- (void) openSessionWithToken:(NSString*)token success:(SuccessBlock)success failure:(FailureBlock)failure {
+- (void) addScope:(GrantScope)scope {
+    [self.oidcManager addScope:scope];
+}
+
+- (void) openSessionWithToken:(NSString*)token result:(ResultBlock)result {
     self.token = token;
     NSMutableURLRequest *request = [self requestWithMethod:@"POST" endpoint:self.verbSession];
     [self sendRequest:request info:@"openSession" completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
@@ -350,58 +366,60 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
             NSObject * jsonObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
             if (error != nil) {
                 CloudStatus status = [CloudUtil statusFromConnection:response data:data];
-                failure (status);
+                result (status);
             } else if ([jsonObject isKindOfClass:[NSDictionary class]] == NO) {
-                failure (CloudErrorResponseMalformed);
+                result (CloudErrorResponseMalformed);
             } else {
                 NSDictionary * dictionary = (NSDictionary*)jsonObject;
                 [CloudUtil dumpAsJSON:dictionary withMessage:@"got token"];
                 self.esid = dictionary[@"esid"];
                 if (self.esid == nil) {
-                    failure (CloudErrorResponseMalformed);
+                    result (CloudErrorResponseMalformed);
+                } else {
+                    _isConnected = YES;
+                    result(StatusOK);
                 }
             }
-            _isConnected = YES;
-            success();
         } else {
-            failure ([CloudUtil statusFromConnection:response data:data]);
+            result ([CloudUtil statusFromConnection:response data:data]);
         }
     }];
 
 }
 
 
-- (void) reopenSessionWithFailure:(FailureBlock)failure success:(SuccessBlock)success {
+- (void) reopenSession:(ResultBlock)result {
     _isConnected = NO;
-    [self openSessionWithToken:self.token success:success failure:failure];
+    [self openSessionWithToken:self.token result:result];
 }
 
-- (void)rootFolderWithSuccess:(FileInfoBlock)success failure:(FailureBlock)failure {
+- (void)rootFolder:(FileInfoBlock)result {
     NSMutableURLRequest *request = [self requestWithMethod:@"GET" endpoint:self.verbListFolder];
     [self sendRequest:request info:@"listFolder" completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         if (error == nil) {
             NSObject * jsonObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
             if (error != nil || [jsonObject isKindOfClass:[NSDictionary class]] == NO) {
-                failure (CloudErrorResponseMalformed);
+                result (nil, CloudErrorResponseMalformed);
             } else {
                 NSDictionary * dictionary = (NSDictionary*)jsonObject;
                 [CloudUtil dumpAsJSON:dictionary withMessage:@"root folder content"];
-                success ([[CloudItem alloc] initWithDictionary:dictionary]);
+                result ([[CloudItem alloc] initWithDictionary:dictionary], StatusOK);
             }
         } else {
             CloudStatus status = [CloudUtil statusFromConnection:response data:data];
             if (status == CloudErrorSessionExpired || status == ExpiredCredentials) { // try to open teh session et relauch the request
                 NSLog (@"rootFolderWithSuccess: session expired, retrying");
-                [self reopenSessionWithFailure:failure success:^{ [self rootFolderWithSuccess:success failure:failure]; }];
+                [self reopenSession:^(CloudStatus status){ [self rootFolder:result]; }];
+                //[self reopenSessionWithFailure:failure success:^{ [self rootFolderWithSuccess:success failure:failure]; }];
             } else {
-                failure (status);
+                result (nil, status);
             }
         }
     }];
 
 }
 
-- (void)listFolder:(CloudItem*)folderCloudItem success:(ListFolderBlock)success failure:(FailureBlock)failure {
+- (void)listFolder:(CloudItem*)folderCloudItem result:(ListFolderBlock)result {
     NSMutableURLRequest *request;
     if (folderCloudItem == nil) {
         request = [self requestWithMethod:@"GET" endpoint:self.verbListFolder];
@@ -412,36 +430,36 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
         if (error == nil) {
             NSObject * jsonObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
             if (error != nil || [jsonObject isKindOfClass:[NSDictionary class]] == NO) {
-                failure (CloudErrorResponseMalformed);
+                result (nil, CloudErrorResponseMalformed);
             } else {
                 NSDictionary * dictionary = (NSDictionary*)jsonObject;
                 [CloudUtil dumpAsJSON:dictionary withMessage:@"got folder content"];
                 NSArray * fileArray = dictionary[@"files"];
                 NSArray * dirArray = dictionary[@"subfolders"];
-                NSMutableArray * result = [[NSMutableArray alloc] initWithCapacity:fileArray.count + dirArray.count];
+                NSMutableArray * files = [[NSMutableArray alloc] initWithCapacity:fileArray.count + dirArray.count];
                 for (NSDictionary * dictionary in fileArray) {
-                    [result addObject:[[CloudItem alloc] initWithDictionary:dictionary]];
+                    [files addObject:[[CloudItem alloc] initWithDictionary:dictionary]];
                 }
                 for (NSDictionary * dictionary in dirArray) {
-                    [result addObject:[[CloudItem alloc] initWithDictionary:dictionary]];
+                    [files addObject:[[CloudItem alloc] initWithDictionary:dictionary]];
                 }
-                success (result);
+                result (files, StatusOK);
             }
         } else {
             CloudStatus status = [CloudUtil statusFromConnection:response data:data];
             if (status == CloudErrorSessionExpired || status == ExpiredCredentials) { // try to reopen the session et relauch the request
                 NSLog (@"listFolder: session expired, retrying");
-                [self reopenSessionWithFailure:failure success:^{ [self listFolder:folderCloudItem success:success failure:failure]; }];
+                [self reopenSession:^(CloudStatus status){ [self listFolder:folderCloudItem result:result]; }];
             } else {
-                failure (status);
+                result (nil, status);
             }
         }
     }];
 }
 
-- (void) fileInfo:(CloudItem *)cloudFile success:(FileInfoBlock)success failure:(FailureBlock)failure {
+- (void) fileInfo:(CloudItem *)cloudFile result:(FileInfoBlock)result  {
     if (cloudFile.isDirectory == YES || cloudFile.identifier == nil) {
-        failure (CloudErrorBadParameter);
+        result (nil, CloudErrorBadParameter);
         return;
     }
     NSMutableURLRequest *request = [self requestWithMethod:@"GET" endpoint:[self.verbFileInfo stringByAppendingString:cloudFile.identifier]];
@@ -449,94 +467,93 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
         if (error == nil) {
             NSObject * jsonObject = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&error];
             if (error != nil || [jsonObject isKindOfClass:[NSMutableDictionary class]] == NO) {
-                failure (CloudErrorResponseMalformed);
+                result (nil, CloudErrorResponseMalformed);
             } else {
                 NSMutableDictionary * dictionary = (NSMutableDictionary*)jsonObject;
                 [CloudUtil dumpAsJSON:dictionary withMessage:@"got file info"];
                 NSDate * date = [self.dateFormatter dateFromString:dictionary[@"creationDate"]];
                 dictionary[@"creationDate"] = [NSNumber numberWithDouble:[date timeIntervalSince1970]];
                 [cloudFile setExtraInfo:dictionary];
-                success (cloudFile);
+                result (cloudFile, StatusOK);
             }
         } else {
             CloudStatus status = [CloudUtil statusFromConnection:response data:data];
             if (status == CloudErrorSessionExpired || status == ExpiredCredentials) { // try to open teh session et relauch the request
                 NSLog (@"fileInfo: session expired, retrying");
-                [self reopenSessionWithFailure:failure success:^{ [self fileInfo:cloudFile success:success failure:failure]; }];
+                [self reopenSession:^(CloudStatus status) { [self fileInfo:cloudFile result:result]; }];
             } else {
-                failure (status);
+                result (nil, status);
             }
         }
     }];
 }
 
-- (void) getThumbnail:(CloudItem *)cloudFile success:(DataBlock)success failure:(FailureBlock)failure {
+- (void) getThumbnail:(CloudItem *)cloudFile result:(DataBlock)result  {
     if (cloudFile.thumbnailURL == nil) {
-        failure (CloudErrorBadParameter);
+        result (nil, CloudErrorBadParameter);
         return;
     }
     
     NSMutableURLRequest *request = [self requestWithMethod:@"GET" endpoint:cloudFile.thumbnailURL];
     [self sendRequest:request info:@"getThumbnail" completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         if (error == nil) {
-            success (data);
+            result (data, StatusOK);
         } else {
             CloudStatus status = [CloudUtil statusFromConnection:response data:data];
             if (status == CloudErrorSessionExpired || status == ExpiredCredentials) { // try to open teh session et relauch the request
                 NSLog (@"getThumbnail: session expired, retrying");
-                [self reopenSessionWithFailure:failure success:^{ [self getThumbnail:cloudFile success:success failure:failure]; }];
+                [self reopenSession:^(CloudStatus status){ [self getThumbnail:cloudFile result:result]; }];
             } else {
-                failure (status);
+                result (nil, status);
             }
         }
     }];
 }
 
-- (void) getPreview:(CloudItem *)cloudFile success:(DataBlock)success failure:(FailureBlock)failure {
+- (void) getPreview:(CloudItem *)cloudFile result:(DataBlock)result {
     if (cloudFile.previewURL == nil) {
-        failure (CloudErrorBadParameter);
+        result (nil, CloudErrorBadParameter);
         return;
     }
     
     NSMutableURLRequest *request = [self requestWithMethod:@"GET" endpoint:cloudFile.previewURL];
     [self sendRequest:request info:@"getPreview" completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         if (error == nil) {
-            success (data);
+            result (data, StatusOK);
         } else {
             CloudStatus status = [CloudUtil statusFromConnection:response data:data];
             if (status == CloudErrorSessionExpired || status == ExpiredCredentials) { // try to open teh session et relauch the request
                 NSLog (@"getPreview: session expired, retrying");
-                [self reopenSessionWithFailure:failure success:^{ [self getThumbnail:cloudFile success:success failure:failure]; }];
+                [self reopenSession:^(CloudStatus status){ [self getPreview:cloudFile result:result]; }];
             } else {
-                failure (status);
+                result (nil, status);
             }
         }
     }];
 }
 
-- (void) getFileContent:(CloudItem *)cloudFile success:(DataBlock)success failure:(FailureBlock)failure {
+- (void) getFileContent:(CloudItem *)cloudFile result:(DataBlock)result  {
     if (cloudFile.downloadURL == nil) {
-        failure (CloudErrorBadParameter);
+        result (nil, CloudErrorBadParameter);
         return;
     }
     NSMutableURLRequest *request = [self requestWithMethod:@"GET" endpoint:cloudFile.downloadURL];
     [self sendRequest:request info:@"getFileContent" completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         if (error == nil) {
-            success (data);
+            result (data, StatusOK);
         } else {
             CloudStatus status = [CloudUtil statusFromConnection:response data:data];
             if (status == CloudErrorSessionExpired || status == ExpiredCredentials) { // try to open teh session et relauch the request
                 NSLog (@"getFileContent: session expired, retrying");
-                [self reopenSessionWithFailure:failure success:^{ [self getFileContent:cloudFile success:success failure:failure]; }];
-
+                [self reopenSession:^(CloudStatus status){ [self getFileContent:cloudFile result:result]; }];
             } else {
-                failure (status);
+                result (nil, status);
             }
         }
     }];
 }
 
-- (void) createFolder:(NSString*)folderName parent:(CloudItem*)parentCloudItem success:(FileInfoBlock)success failure:(FailureBlock)failure {
+- (void) createFolder:(NSString*)folderName parent:(CloudItem*)parentCloudItem result:(FileInfoBlock)result {
     NSMutableURLRequest *request = [self requestWithMethod:@"POST" endpoint:self.verbCreateFolder];
     NSString * bodyString;
     if (parentCloudItem == nil) {
@@ -549,47 +566,47 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
         if (error == nil) {
             NSObject * jsonObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
             if (error != nil || [jsonObject isKindOfClass:[NSDictionary class]] == NO) {
-                failure (CloudErrorResponseMalformed);
+                result (nil, CloudErrorResponseMalformed);
             } else {
                 NSDictionary * dictionary = (NSDictionary*)jsonObject;
                 CloudItem * cloudFile = [[CloudItem alloc] init];
                 cloudFile.identifier = dictionary[@"folderId"];
                 cloudFile.type = CloudTypeDirectory;
-                success (cloudFile);
+                result (cloudFile, StatusOK);
             }
         } else {
             CloudStatus status = [CloudUtil statusFromConnection:response data:data];
             if (status == CloudErrorSessionExpired || status == ExpiredCredentials) { // try to open teh session et relauch the request
                 NSLog (@"createFolder: session expired, retrying");
-                [self reopenSessionWithFailure:failure success:^{ [self createFolder:folderName parent:parentCloudItem success:success failure:failure]; }];
+                [self reopenSession:^(CloudStatus status){ [self createFolder:folderName parent:parentCloudItem result:result]; }];
             } else {
-                failure (status);
+                result (nil, status);
             }
         }
     }];
 }
 
-- (void) getFreeSpace:(FreeSpaceBlock)success failure:(FailureBlock)failure {
+- (void) getFreeSpace:(FreeSpaceBlock)result {
     NSMutableURLRequest *request = [self requestWithMethod:@"GET" endpoint:self.verbFreespace];
     [self sendRequest:request info:@"freespace" completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         if (error == nil) {
             NSObject * jsonObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
             if (error != nil) {
-                failure (CloudErrorResponseMalformed);
+                result (-1, CloudErrorResponseMalformed);
             } else {
                 NSDictionary * dictionary = (NSDictionary*)jsonObject;
                 NSNumber * number = dictionary[@"freespace"];
                 long size =  [number integerValue];
-                success (size);
+                result (size, StatusOK);
             }
         } else {
-            failure ([CloudUtil statusFromConnection:response data:data]);
+            result (-1, [CloudUtil statusFromConnection:response data:data]);
         }
     }];
 
 }
 
-- (void) uploadData:(NSData*)data filename:(NSString*)filename folderID:(NSString*)folderID progress:(ProgressBlock)progress success:(FileInfoBlock)success failure:(FailureBlock)failure {
+- (void) uploadData:(NSData*)data filename:(NSString*)filename folderID:(NSString*)folderID progress:(ProgressBlock)progress result:(FileInfoBlock)result {
     NSMutableURLRequest * request = [self postRequestWithEndpoint:self.verbUpload filename:filename data:data folder:folderID];
     NSDate * startingDate = [NSDate date];
     float contentSize = data.length / 1024.0;
@@ -601,57 +618,57 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
             }
             NSObject * jsonObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
             if (error != nil || [jsonObject isKindOfClass:[NSDictionary class]] == NO) {
-                failure (CloudErrorResponseMalformed);
+                result (nil, CloudErrorResponseMalformed);
             } else {
                 NSDictionary * dictionary = (NSDictionary*)jsonObject;
                 CloudItem * cloudFile = [[CloudItem alloc] init];
                 cloudFile.identifier = dictionary[@"folderId"];
                 cloudFile.type = CloudTypeDirectory;
-                success (cloudFile);
+                result (cloudFile, StatusOK);
             }
         } else {
-            failure ([CloudUtil statusFromConnection:response data:data]);
+            result (nil, [CloudUtil statusFromConnection:response data:data]);
         }
     }];
 }
 
-- (void) deleteFolder:(CloudItem*)folderCloudItem success:(SuccessBlock)success failure:(FailureBlock)failure {
+- (void) deleteFolder:(CloudItem*)folderCloudItem result:(ResultBlock)result {
     NSMutableURLRequest *request = [self requestWithMethod:@"DELETE" endpoint:[self.verbDeleteFolder stringByAppendingString:folderCloudItem.identifier]];
     [self sendRequest:request info:@"deleteFolder" completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         if (error == nil) {
             if (error != nil) {
-                failure (CloudErrorResponseMalformed);
+                result (CloudErrorResponseMalformed);
             } else {
-                success ();
+                result (StatusOK);
             }
         } else {
             CloudStatus status = [CloudUtil statusFromConnection:response data:data];
             if (status == CloudErrorSessionExpired || status == ExpiredCredentials) { // try to open teh session et relauch the request
                 NSLog (@"deleteFolder: session expired, retrying");
-                [self reopenSessionWithFailure:failure success:^{ [self deleteFolder:folderCloudItem success:success failure:failure]; }];
+                [self reopenSession:^(CloudStatus status){ [self deleteFolder:folderCloudItem result:result]; }];
             } else {
-                failure (status);
+                result (status);
             }
         }
     }];
 }
 
-- (void) deleteFile:(CloudItem*)fileCloudItem success:(SuccessBlock)success failure:(FailureBlock)failure {
+- (void) deleteFile:(CloudItem*)fileCloudItem result:(ResultBlock)result {
     NSMutableURLRequest *request = [self requestWithMethod:@"DELETE" endpoint:[self.verbDeleteFile stringByAppendingString:fileCloudItem.identifier]];
     [self sendRequest:request info:@"deleteFile" completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         if (error == nil) {
             if (error != nil) {
-                failure (CloudErrorResponseMalformed);
+                result (CloudErrorResponseMalformed);
             } else {
-                success ();
+                result (StatusOK);
             }
         } else {
             CloudStatus status = [CloudUtil statusFromConnection:response data:data];
             if (status == CloudErrorSessionExpired || status == ExpiredCredentials) { // try to open teh session et relauch the request
                 NSLog (@"deleteFile: session expired, retrying");
-                [self reopenSessionWithFailure:failure success:^{ [self deleteFile:fileCloudItem success:success failure:failure]; }];
+                [self reopenSession:^(CloudStatus status){ [self deleteFile:fileCloudItem result:result]; }];
             } else {
-                failure (status);
+                result (status);
             }
         }
     }];

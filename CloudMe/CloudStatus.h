@@ -17,6 +17,19 @@
 
 #ifndef CloudMeSDK_CloudStatus_h
 #define CloudMeSDK_CloudStatus_h
+
+
+/** List of scopes the app can ask the user to be granted.
+ * OpenID and Cloud are automatically added by default
+ */
+typedef NS_OPTIONS(NSInteger, GrantScope) {
+    GrantScopeOpenID       = (1UL << 0),
+    GrantScopeUserDetails  = (1UL << 1),
+    GrantScopeCloud        = (1UL << 2),
+    GrantScopeOfflineAcess = (1UL << 3),
+    GrantScopeFullRead     = (1UL << 4),
+};
+
 /** List of error codes that are used when an error occured during the connection with the cloud.
  */
 typedef enum {

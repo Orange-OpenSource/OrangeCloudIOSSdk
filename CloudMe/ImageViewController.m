@@ -16,24 +16,24 @@
 
 
 #import "ImageViewController.h"
-#import "CloudSession.h"
+#import "CloudManager.h"
 #import "FileListViewController.h"
 
 @interface ImageViewController ()
 @property (nonatomic) UIImageView * imageView;
 @property (nonatomic) UIActivityIndicatorView * indicator;
-@property (nonatomic) CloudSession * session;
+@property (nonatomic) CloudManager * cloudManager;
 @property (nonatomic) CloudItem * cloudItem;
 @property (nonatomic) UIAlertView * deleteFileAlert;
 @end
 
 @implementation ImageViewController
 
-- (id) initWithSession:(CloudSession*)session item:(CloudItem*)cloudItem {
+- (id) initWithManager:(CloudManager*)cloudManager item:(CloudItem*)cloudItem {
     self = [super initWithNibName:nil bundle:nil];
     if (self) {
         // Custom initialization
-        self.session = session;
+        self.cloudManager = cloudManager;
         self.cloudItem = cloudItem;
         self.view.hidden = NO;
         self.title = cloudItem.name;
@@ -45,7 +45,7 @@
     [super viewDidLoad];
     self.navigationController.toolbarHidden = NO;
     UIImage * image = [[UIImage imageNamed:@"LS_Delete"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
-    UIBarButtonItem * deleteFile = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStyleBordered target:self action:@selector(deleteFile:)];
+    UIBarButtonItem * deleteFile = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStylePlain target:self action:@selector(deleteFile:)];
     [self setToolbarItems: @[
                              [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
                              deleteFile,
@@ -65,12 +65,14 @@
 
     self.view.backgroundColor = [UIColor whiteColor];
     
-    [self.session getFileContent:self.cloudItem success:^(NSData * data) {
-        [self.indicator stopAnimating];
-        self.imageView.image = [UIImage imageWithData:data];
-    } failure:^(CloudStatus status) {
-        [self.indicator stopAnimating];
-        NSLog (@"Error during file content retrieval: %@", [CloudSession statusString:status]);
+    [self.cloudManager getFileContent:self.cloudItem result:^(NSData * data, CloudStatus status) {
+        if (status == StatusOK) {
+            [self.indicator stopAnimating];
+            self.imageView.image = [UIImage imageWithData:data];
+        } else {
+            [self.indicator stopAnimating];
+            NSLog (@"Error during file content retrieval: %@", [CloudManager statusString:status]);
+        }
     }];
 
 }
@@ -78,18 +80,20 @@
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
     if (alertView == self.deleteFileAlert) {
         if (buttonIndex == 1) {
-            [self.session deleteFile:self.cloudItem success:^{
-                NSArray * viewControllers = self.navigationController.viewControllers;
-                NSInteger index = [viewControllers indexOfObject:self];
-                if (index != NSNotFound && index > 0) {
-                    UIViewController * previousController = viewControllers[index-1];
-                    if ([previousController isKindOfClass:[FileListViewController class]]) {
+            [self.cloudManager deleteFile:self.cloudItem result:^(CloudStatus status){
+                if (status == StatusOK) {
+                    NSArray * viewControllers = self.navigationController.viewControllers;
+                    NSInteger index = [viewControllers indexOfObject:self];
+                    if (index != NSNotFound && index > 0) {
+                        UIViewController * previousController = viewControllers[index-1];
+                        if ([previousController isKindOfClass:[FileListViewController class]]) {
                         [(FileListViewController*)previousController loadContent];
+                        }
                     }
+                    [self.navigationController popViewControllerAnimated:YES];
+                } else {
+                    NSLog (@"***** Cannot delete file %@", self.title);
                 }
-                [self.navigationController popViewControllerAnimated:YES];
-            } failure:^(CloudStatus status) {
-                NSLog (@"***** Cannot delete file %@", self.title);
             }];
         }
     }

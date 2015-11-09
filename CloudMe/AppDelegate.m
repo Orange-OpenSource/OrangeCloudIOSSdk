@@ -18,14 +18,26 @@
 #import "CloudTestViewController.h"
 #import "OIDCManager.h"
 
+// leave uncommented if you want to use the swift root controller
+#define USE_SWIFT
+
+#ifdef USE_SWIFT
+#import "OrangeCloudSDK-Swift.h"
+#endif
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    NSLog(@"main screen size :%@", NSStringFromCGRect([[UIScreen mainScreen] bounds]));
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.tintColor = [UIColor colorWithRed:48/255.0 green:120/255.0 blue:131/255.0 alpha:1];
 
     // Here we instantiate our custom view controller taht will connect to Orange Cloud
+#ifdef USE_SWIFT
+    self.window.rootViewController =  [[SwiftTestController alloc]initWithNibName:nil bundle:nil];
+#else
     self.window.rootViewController = [[CloudTestViewController alloc]initWithNibName:nil bundle:nil];
+#endif
 
     [self.window makeKeyAndVisible];
     return YES;
@@ -34,8 +46,13 @@
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
     // when the authent process is done extrenally using Safari mobile, the application is called back using the url that starts with the app custom scheme.
     // We need to give this url to the OIDC manager in order to extract the authorization code and then to continue the connection process
+
+#ifdef USE_SWIFT
+    SwiftTestController * controller = (SwiftTestController*)self.window.rootViewController;
+#else
     CloudTestViewController * controller = (CloudTestViewController*)self.window.rootViewController;
-    if ([controller.cloudSession handleOpenURL:url]) {
+#endif
+    if ([controller.cloudManager handleOpenURL:url]) {
         return YES;
     }
     return NO;
@@ -43,7 +60,11 @@
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+#ifdef USE_SWIFT
+    SwiftTestController * controller = (SwiftTestController*)self.window.rootViewController;
+#else
     CloudTestViewController * controller = (CloudTestViewController*)self.window.rootViewController;
+#endif
     [controller connect];
 }
 
