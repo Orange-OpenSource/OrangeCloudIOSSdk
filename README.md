@@ -13,11 +13,21 @@ We'd love to hear your feedback.
 
 Notes on Xcode project:
 ----------
-This project is compatible with both iOS 7 and iOS 8 versions.
+This project is compatible with both iOS 8 and iOS 9 versions.
 
 The Cloud API can be accessed using conventional HTTP calls, however this Objective-C project
 provides a set of classes that remove the burden of making your own calls.
 These classes are used to implement a simple navigation application to illustrate their usage.
+
+Swift compatibility:
+-----------
+You can use this SDK using either Objective-C or Swift. An example of
+Swift usage is provided in SwiftTestController.swift. You will just
+need to insert
+''' objective-c
+#import "CloudManager.h"
+'''
+in your  bridging header
 
 CloudTestViewController:
 ---------------
@@ -27,7 +37,7 @@ This is also the place where you trigger user authentication and then, through a
 start using the cloud.
 
 
-CloudSession:
+CloudManager:
 -------------
 This class gives you access to the Cloud functionalities : user authentication, list of available files,
 detailed info on a file, upload and download of content.
