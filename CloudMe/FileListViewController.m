@@ -18,7 +18,7 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import "FileListViewController.h"
 #import "FileListViewCell.h"
-#import "CloudTestViewController.h"
+#import "BrowseController.h"
 #import "ImageViewController.h"
 
 @interface ProgressView : UIView
@@ -207,7 +207,7 @@
 
 - (void) loadContent {
     [self.indicator startAnimating];
-    [self.cloudManager listFolder:self.cloudItem result:^(NSArray * array, CloudStatus status) {
+    [self.cloudManager listFolder:self.cloudItem restrictedMode:FALSE showThumbnails:TRUE filter:FilterTypeAll flat:FALSE tree:FALSE limit:0 offset:0 result:^(NSArray * array, CloudStatus status) {
         if (status == StatusOK) {
             if (self.refreshControl.isRefreshing) {
                 [self.refreshControl endRefreshing];
@@ -295,7 +295,7 @@
         }
     } else if (alertView == self.logoutAlert) {
         if (buttonIndex == 1) {
-            CloudTestViewController * rootController = (CloudTestViewController*)self.navigationController;
+            BrowseController * rootController = (BrowseController*)self.navigationController;
             [rootController logout];
         }
     }

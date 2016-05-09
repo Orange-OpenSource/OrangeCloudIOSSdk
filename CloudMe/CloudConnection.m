@@ -347,6 +347,8 @@ static NSMutableArray * pendingRequests = nil;
             }
         } else if (statusCode == 501) {
             return CloudCountryNotSupported;
+        } else if (statusCode == 800) {
+            return CloudAlreadyExists;
         }
     }
     return CloudErrorUnknown;

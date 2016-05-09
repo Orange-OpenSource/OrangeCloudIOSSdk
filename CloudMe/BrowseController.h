@@ -21,7 +21,7 @@
 
 /** This controller contains all the logic to connect to the Orange Cloud
  */
-@interface CloudTestViewController : UINavigationController
+@interface BrowseController : UINavigationController
 
 /** the cloud session object used to access Orange Cloud */
 @property (nonatomic) CloudManager * cloudManager;

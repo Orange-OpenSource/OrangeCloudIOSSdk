@@ -15,10 +15,10 @@
  */
 
 /** set to YES if you want to have traces output with a curl syntax. Warning: can be verbose, use it only when you have issues */
-#define TRACE_API_CALL YES
+#define TRACE_API_CALL NO
 
 /** set to YES if you want bandwidth usage stats. Warning: can be verbose, use it only when you have issues */
 #define TRACE_BANDWIDTH_USAGE NO
 
-/** set to YES if you do NOT want mutiple requests simultaneously. In this case network requests are sent in sequence. If set to NO, teh system will manage scheduling of multiple connections */
+/** set to YES if you do NOT want mutiple requests simultaneously. In this case network requests are sent in sequence. If set to NO, the system will manage scheduling of multiple connections */
 #define FORCE_SERIAL_REQUESTS NO

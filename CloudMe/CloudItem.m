@@ -43,7 +43,7 @@
         } else if ([type isEqualToString:@"VIDEO"]) {
             _type = CloudTypeVideo;
         }
-        
+        [self setExtraInfo:dictionary];
     }
     return self;
 }

@@ -23,11 +23,11 @@
  * OpenID and Cloud are automatically added by default
  */
 typedef NS_OPTIONS(NSInteger, GrantScope) {
-    GrantScopeOpenID       = (1UL << 0),
-    GrantScopeUserDetails  = (1UL << 1),
-    GrantScopeCloud        = (1UL << 2),
-    GrantScopeOfflineAcess = (1UL << 3),
-    GrantScopeFullRead     = (1UL << 4),
+    GrantScopeOpenID        = (1UL << 0),
+    GrantScopeUserDetails   = (1UL << 1),
+    GrantScopeCloud         = (1UL << 2),
+    GrantScopeOfflineAccess = (1UL << 3),
+    GrantScopeFullRead      = (1UL << 4),
 };
 
 /** List of error codes that are used when an error occured during the connection with the cloud.
@@ -157,7 +157,7 @@ typedef enum {
     CloudErrorNotFound,
     
     /** The command list folder failed. Most likely that the root directory is not valid*/
-    CloudErrorListFolderfailed,
+    CloudErrorListFolderFailed,
     
     /** The server returned a malformed answer. Probably not so much to do at this point except retrying the authentication */
     CloudErrorResponseMalformed,
@@ -182,6 +182,9 @@ typedef enum {
     
     /** The call of the method was not authorized*/
     CloudErrorMethodNotAllowed,
+    
+    /** The file or folder already exists. Cane be raised during folder creation for example */
+    CloudAlreadyExists,
     
     /** The size of the latest  uploaded file was bigger that the maximum allowed size */
     CloudErrorFileTooBig,

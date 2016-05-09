@@ -39,7 +39,6 @@
 
 @property (nonatomic) NSString * cloudServer;
 @property (nonatomic) NSString * contentServer;
-@property (nonatomic) NSString * token;
 @property (nonatomic) NSString * esid;
 @property (nonatomic) NSDateFormatter * dateFormatter;
 @property (nonatomic) NSString * verbSession;
@@ -50,6 +49,8 @@
 @property (nonatomic) NSString * verbFreespace;
 @property (nonatomic) NSString * verbDeleteFolder;
 @property (nonatomic) NSString * verbDeleteFile;
+@property (nonatomic) NSString * verbMoveFolder;
+@property (nonatomic) NSString * verbMoveFile;
 
 /** these alerts are used when user has not accepted end user licence agreements */
 @property (nonatomic) UIAlertView * alertEULA;
@@ -108,24 +109,36 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
         return NO;
     }
 }
+//#define BETA
 
 - (id) initWithAppKey:(NSString*)appKey appSecret:(NSString*) appSecret redirectURI:(NSString*)redirectURI {
     self = [super init];
     if (self != nil) {
         
+#ifdef BETA
+        NSString * version = @"beta";
+        NSString * mediaServer = @"http://alpha-api.orange.fr/cloud/beta";
+        
+#else
+        NSString * version = @"v1";
+        NSString * mediaServer = @"https://cloudapi.orange.com";
+        
+#endif
         // setup production servers
         self.cloudServer = @"https://api.orange.com";
-        self.contentServer = @"https://cloudapi.orange.com";
+        self.contentServer = mediaServer;
 
         // setup verbs to use
-        self.verbSession = @"/cloud/v1/session";
-        self.verbListFolder = @"/cloud/v1/folders/";
-        self.verbCreateFolder = @"/cloud/v1/folders";
-        self.verbUpload = @"/cloud/v1/files/content";
-        self.verbFileInfo = @"/cloud/v1/files/";
-        self.verbFreespace = @"/cloud/v1/freespace";
-        self.verbDeleteFile = @"/cloud/v1/files/";
-        self.verbDeleteFolder = @"/cloud/v1/folders/";
+        self.verbSession = [NSString stringWithFormat:@"/cloud/%@/session", version];
+        self.verbListFolder = [NSString stringWithFormat:@"/cloud/%@/folders/", version];
+        self.verbCreateFolder = [NSString stringWithFormat:@"/cloud/%@/folders", version];
+        self.verbUpload = [NSString stringWithFormat:@"/cloud/%@/files/content", version];
+        self.verbFileInfo = [NSString stringWithFormat:@"/cloud/%@/files/", version];
+        self.verbFreespace = [NSString stringWithFormat:@"/cloud/%@/freespace", version];
+        self.verbDeleteFile = [NSString stringWithFormat:@"/cloud/%@/files/", version];
+        self.verbDeleteFolder = [NSString stringWithFormat:@"/cloud/%@/folders/", version];
+        self.verbMoveFolder = [NSString stringWithFormat:@"/cloud/%@/folders/", version];
+        self.verbMoveFile = [NSString stringWithFormat:@"/cloud/%@/files/", version];
 
         // configure internal properties
         self.timeout = 60.0;
@@ -218,7 +231,7 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
             
         case CloudErrorResponseMalformed:
             return @"malformed response";
-        case CloudErrorListFolderfailed:
+        case CloudErrorListFolderFailed:
             return @"listing forlder failed";
         case CloudErrorSessionFailed:
             return @"opening session failed";
@@ -248,6 +261,8 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
             return @"Invalid token";
         case CloudMissingToken:
             return @"Missing token";
+        case CloudAlreadyExists:
+            return @"Already exists";
         case CloudErrorNotFound:
             return @"File not found";
         case CloudErrorUnknown:
@@ -268,9 +283,9 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:sessionUrl cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:self.timeout];
     [request setHTTPMethod:method];
     [request setValue:[@"Bearer " stringByAppendingString:self.token] forHTTPHeaderField:@"Authorization"];
-    if (self.esid != nil) {
-        [request setValue:self.esid forHTTPHeaderField:@"X-Orange-CA-ESID"];
-    }
+//    if (self.esid != nil) {
+//        [request setValue:self.esid forHTTPHeaderField:@"X-Orange-CA-ESID"];
+//    }
     return request;
 }
 
@@ -322,7 +337,11 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
 - (void) openSessionFrom:(UIViewController*) parentController result:(ResultBlock)result {
     [self.oidcManager authenticateFrom:parentController completion:^(CloudStatus status, NSString *token, NSTimeInterval duration) {
         if (status == AuthenticationOK) {
-            [self openSessionWithToken:token result:result];
+            self.token = token;
+            _isConnected = YES;
+
+            result (StatusOK);
+            //[self openSessionWithToken:token result:result];
         } else {
             result(status);
         }
@@ -372,13 +391,13 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
             } else {
                 NSDictionary * dictionary = (NSDictionary*)jsonObject;
                 [CloudUtil dumpAsJSON:dictionary withMessage:@"got token"];
-                self.esid = dictionary[@"esid"];
-                if (self.esid == nil) {
-                    result (CloudErrorResponseMalformed);
-                } else {
-                    _isConnected = YES;
-                    result(StatusOK);
-                }
+//                self.esid = dictionary[@"esid"];
+//                if (self.esid == nil) {
+//                    result (CloudErrorResponseMalformed);
+//                } else {
+//                    _isConnected = YES;
+//                    result(StatusOK);
+//                }
             }
         } else {
             result ([CloudUtil statusFromConnection:response data:data]);
@@ -394,7 +413,7 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
 }
 
 - (void)rootFolder:(FileInfoBlock)result {
-    NSMutableURLRequest *request = [self requestWithMethod:@"GET" endpoint:self.verbListFolder];
+    NSMutableURLRequest *request = [self requestWithMethod:@"GET" endpoint:[self.verbListFolder stringByAppendingString:@"?restrictedmode"]];
     [self sendRequest:request info:@"listFolder" completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         if (error == nil) {
             NSObject * jsonObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
@@ -419,13 +438,43 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
 
 }
 
-- (void)listFolder:(CloudItem*)folderCloudItem result:(ListFolderBlock)result {
+- (NSString*) getFilterName:(FilterType)type {
+    return @"other";
+}
+
+- (void)listFolder:(CloudItem * _Nonnull)folderCloudItem
+    restrictedMode:(BOOL)restrictedMode
+    showThumbnails:(BOOL)showThumbnails
+            filter:(FilterType)filter
+              flat:(BOOL)flat
+              tree:(BOOL)tree
+             limit:(int)limit
+            offset:(int)offset
+            result:(ListFolderBlock _Nonnull)result {
     NSMutableURLRequest *request;
-    if (folderCloudItem == nil) {
-        request = [self requestWithMethod:@"GET" endpoint:self.verbListFolder];
-    } else {
-        request = [self requestWithMethod:@"GET" endpoint:[self.verbListFolder stringByAppendingString:folderCloudItem.identifier]];
+
+    NSString * endPoint = self.verbListFolder;
+
+    NSString * prefix = @"?";
+    
+    if (folderCloudItem != nil) {
+        endPoint = [endPoint stringByAppendingFormat:@"%@", folderCloudItem.identifier];
     }
+
+    if (restrictedMode) {
+        endPoint = [endPoint stringByAppendingFormat:@"%@restrictedmode", prefix];
+        prefix = @"&";
+    }
+    if (showThumbnails) {
+        endPoint = [endPoint stringByAppendingFormat:@"%@showthumbnails", prefix];
+        prefix = @"&";
+    }
+    if (filter != FilterTypeAll) {
+        endPoint = [endPoint stringByAppendingFormat:@"%@%@", prefix, [self getFilterName:filter]];
+        prefix = @"&";
+    }
+    
+    request = [self requestWithMethod:@"GET" endpoint:endPoint];
     [self sendRequest:request info:@"listFolder" completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         if (error == nil) {
             NSObject * jsonObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
@@ -455,6 +504,10 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
             }
         }
     }];
+}
+
+- (void)listFolder:(CloudItem * _Nonnull)folderCloudItem result:(ListFolderBlock _Nonnull)result {
+    [self listFolder:folderCloudItem restrictedMode:NO showThumbnails:NO filter:FilterTypeAll flat:NO tree:NO limit:0 offset:0 result:result];
 }
 
 - (void) fileInfo:(CloudItem *)cloudFile result:(FileInfoBlock)result  {
@@ -569,14 +622,12 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
                 result (nil, CloudErrorResponseMalformed);
             } else {
                 NSDictionary * dictionary = (NSDictionary*)jsonObject;
-                CloudItem * cloudFile = [[CloudItem alloc] init];
-                cloudFile.identifier = dictionary[@"folderId"];
-                cloudFile.type = CloudTypeDirectory;
-                result (cloudFile, StatusOK);
+                CloudItem * folder = [[CloudItem alloc] initWithDictionary:dictionary];
+                result (folder, StatusOK);
             }
         } else {
             CloudStatus status = [CloudUtil statusFromConnection:response data:data];
-            if (status == CloudErrorSessionExpired || status == ExpiredCredentials) { // try to open teh session et relauch the request
+            if (status == CloudErrorSessionExpired || status == ExpiredCredentials) { // try to open the session et relauch the request
                 NSLog (@"createFolder: session expired, retrying");
                 [self reopenSession:^(CloudStatus status){ [self createFolder:folderName parent:parentCloudItem result:result]; }];
             } else {
@@ -603,7 +654,6 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
             result (-1, [CloudUtil statusFromConnection:response data:data]);
         }
     }];
-
 }
 
 - (void) uploadData:(NSData*)data filename:(NSString*)filename folderID:(NSString*)folderID progress:(ProgressBlock)progress result:(FileInfoBlock)result {
@@ -621,10 +671,11 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
                 result (nil, CloudErrorResponseMalformed);
             } else {
                 NSDictionary * dictionary = (NSDictionary*)jsonObject;
-                CloudItem * cloudFile = [[CloudItem alloc] init];
-                cloudFile.identifier = dictionary[@"folderId"];
-                cloudFile.type = CloudTypeDirectory;
-                result (cloudFile, StatusOK);
+                CloudItem * file = [[CloudItem alloc] init];
+                file.identifier = dictionary[@"fileId"];
+                file.name = dictionary[@"fileName"];
+                file.type = CloudTypeFile;
+                result (file, StatusOK);
             }
         } else {
             result (nil, [CloudUtil statusFromConnection:response data:data]);
@@ -654,6 +705,10 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
 }
 
 - (void) deleteFile:(CloudItem*)fileCloudItem result:(ResultBlock)result {
+    if (fileCloudItem.identifier == nil) {
+        result (CloudErrorNotAFile);
+        return;
+    }
     NSMutableURLRequest *request = [self requestWithMethod:@"DELETE" endpoint:[self.verbDeleteFile stringByAppendingString:fileCloudItem.identifier]];
     [self sendRequest:request info:@"deleteFile" completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         if (error == nil) {
@@ -672,6 +727,54 @@ typedef void (^RequestCallback)(NSURLResponse *response, NSData * data, NSError 
             }
         }
     }];
+}
+
+- (NSMutableURLRequest*) makeMoveRequest:(CloudItem * _Nonnull)item {
+    NSString * verb = item.isDirectory ? self.verbMoveFolder : self.verbMoveFile;
+    NSString * endPoint = [verb stringByAppendingString:item.identifier];
+    NSMutableURLRequest *request = [self requestWithMethod:@"POST" endpoint:endPoint];
+    return request;
+}
+
+- (void) renameAux:(NSMutableURLRequest *)request bodyString:(NSString*) bodyString item:(CloudItem*)item result:(FileInfoBlock _Nonnull)result info:(NSString*)info {
+    [self addJSON:bodyString toRequest:request];
+    [self sendRequest:request info:info completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+        if (error == nil) {
+            NSObject * jsonObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+            if (error != nil || [jsonObject isKindOfClass:[NSDictionary class]] == NO) {
+                result (nil, CloudErrorResponseMalformed);
+            } else {
+                NSDictionary * dictionary = (NSDictionary*)jsonObject;
+                CloudItem * folder = [[CloudItem alloc] initWithDictionary:dictionary];
+                folder.type = item.type;
+                result (folder, StatusOK);
+            }
+        } else {
+            CloudStatus status = [CloudUtil statusFromConnection:response data:data];
+            if (status == CloudErrorSessionExpired || status == ExpiredCredentials) { // try to open the session et relauch the request
+                NSLog (@"createFolder: session expired, retrying");
+                [self reopenSession:^(CloudStatus status){ [self renameAux:request bodyString:bodyString item:item result:result info:info]; }];
+            } else {
+                result (nil, status);
+            }
+        }
+    }];
+}
+
+
+- (void) rename :(CloudItem * _Nonnull)item newName:(NSString * _Nonnull)newName result:(FileInfoBlock _Nonnull)result {
+    NSString * bodyString = [NSString stringWithFormat:@"{ \"name\":\"%@\" }", newName];
+    [self renameAux:[self makeMoveRequest:item] bodyString:bodyString item:item result:result info:@"rename"];
+}
+
+- (void) move :(CloudItem * _Nonnull)item destination:(CloudItem * _Nonnull)destination result:(FileInfoBlock _Nonnull)result {
+    NSString * bodyString = [NSString stringWithFormat:@"{ \"parentFolderId\":\"%@\" }", destination.identifier];
+    [self renameAux:[self makeMoveRequest:item] bodyString:bodyString item:item result:result info:@"move"];
+}
+
+- (void) copy :(CloudItem * _Nonnull)item destination:(CloudItem * _Nonnull)destination result:(FileInfoBlock _Nonnull)result {
+    NSString * bodyString = [NSString stringWithFormat:@"{ \"parentFolderId\":\"%@\", \"clone\" : true }", destination.identifier];
+    [self renameAux:[self makeMoveRequest:item] bodyString:bodyString item:item result:result info:@"copy"];
 }
 
 @end

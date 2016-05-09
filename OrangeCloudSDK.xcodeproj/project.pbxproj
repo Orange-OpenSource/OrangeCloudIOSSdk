@@ -15,12 +15,11 @@
 		E22A82B7194AF24600A4C8F9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E22A82B6194AF24600A4C8F9 /* main.m */; };
 		E22A82BB194AF24600A4C8F9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E22A82BA194AF24600A4C8F9 /* AppDelegate.m */; };
 		E22A82BD194AF24600A4C8F9 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E22A82BC194AF24600A4C8F9 /* Images.xcassets */; };
-		E22A82DB194AF2AE00A4C8F9 /* CloudTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E22A82DA194AF2AE00A4C8F9 /* CloudTestViewController.m */; };
+		E22A82DB194AF2AE00A4C8F9 /* BrowseController.m in Sources */ = {isa = PBXBuildFile; fileRef = E22A82DA194AF2AE00A4C8F9 /* BrowseController.m */; };
 		E22A82EF194AF30000A4C8F9 /* FileListViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E22A82EA194AF30000A4C8F9 /* FileListViewCell.m */; };
 		E22A82F0194AF30000A4C8F9 /* ImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E22A82EC194AF30000A4C8F9 /* ImageViewController.m */; };
 		E22A82F1194AF30000A4C8F9 /* FileListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E22A82EE194AF30000A4C8F9 /* FileListViewController.m */; };
 		E22A830E194AF34B00A4C8F9 /* Indicator@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E22A8305194AF34B00A4C8F9 /* Indicator@2x.png */; };
-		E23F27FF194F14E400E1E89E /* README in Resources */ = {isa = PBXBuildFile; fileRef = E23F27FE194F14E400E1E89E /* README */; };
 		E291ED491A13D28700A552D6 /* LS_Alert@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E291ED351A13D28700A552D6 /* LS_Alert@2x.png */; };
 		E291ED4A1A13D28700A552D6 /* LS_Audio@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E291ED361A13D28700A552D6 /* LS_Audio@2x.png */; };
 		E291ED4B1A13D28700A552D6 /* LS_Cancel@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E291ED371A13D28700A552D6 /* LS_Cancel@2x.png */; };
@@ -41,7 +40,16 @@
 		E291ED5A1A13D28700A552D6 /* LS_Spinner@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E291ED461A13D28700A552D6 /* LS_Spinner@2x.png */; };
 		E291ED5B1A13D28700A552D6 /* LS_Upload@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E291ED471A13D28700A552D6 /* LS_Upload@2x.png */; };
 		E291ED5C1A13D28700A552D6 /* LS_Video@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E291ED481A13D28700A552D6 /* LS_Video@2x.png */; };
-		E2C36E971BEA4DA800B9D2C6 /* SwiftTestController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2C36E961BEA4DA800B9D2C6 /* SwiftTestController.swift */; };
+		E2BC16E61CC4D33300214CFB /* StatusController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BC16E51CC4D33300214CFB /* StatusController.swift */; };
+		E2BC16EB1CC4D61700214CFB /* led.yellow.png in Resources */ = {isa = PBXBuildFile; fileRef = E2BC16E71CC4D61700214CFB /* led.yellow.png */; };
+		E2BC16EC1CC4D61700214CFB /* led.gray.png in Resources */ = {isa = PBXBuildFile; fileRef = E2BC16E81CC4D61700214CFB /* led.gray.png */; };
+		E2BC16ED1CC4D61700214CFB /* led.green.png in Resources */ = {isa = PBXBuildFile; fileRef = E2BC16E91CC4D61700214CFB /* led.green.png */; };
+		E2BC16EE1CC4D61700214CFB /* led.red.png in Resources */ = {isa = PBXBuildFile; fileRef = E2BC16EA1CC4D61700214CFB /* led.red.png */; };
+		E2BC16F01CC4D67300214CFB /* UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BC16EF1CC4D67300214CFB /* UnitTests.swift */; };
+		E2BC16F21CC4D91700214CFB /* TestItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BC16F11CC4D91700214CFB /* TestItem.swift */; };
+		E2BC16F41CC61F1600214CFB /* image.jpg in Resources */ = {isa = PBXBuildFile; fileRef = E2BC16F31CC61F1600214CFB /* image.jpg */; };
+		E2C36E971BEA4DA800B9D2C6 /* SwiftBrowseController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2C36E961BEA4DA800B9D2C6 /* SwiftBrowseController.swift */; };
+		E2D6AFF71CCE4E09000D7E17 /* trash@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E2D6AFF61CCE4E09000D7E17 /* trash@2x.png */; };
 		E2E23E271A07DD3600F79394 /* OIDCManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E2E23E1E1A07DD3600F79394 /* OIDCManager.m */; };
 		E2E23E281A07DD3600F79394 /* CloudItem.m in Sources */ = {isa = PBXBuildFile; fileRef = E2E23E211A07DD3600F79394 /* CloudItem.m */; };
 		E2E23E291A07DD3600F79394 /* CloudConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = E2E23E231A07DD3600F79394 /* CloudConnection.m */; };
@@ -61,8 +69,8 @@
 		E22A82B9194AF24600A4C8F9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		E22A82BA194AF24600A4C8F9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		E22A82BC194AF24600A4C8F9 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		E22A82D9194AF2AE00A4C8F9 /* CloudTestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudTestViewController.h; sourceTree = "<group>"; };
-		E22A82DA194AF2AE00A4C8F9 /* CloudTestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CloudTestViewController.m; sourceTree = "<group>"; };
+		E22A82D9194AF2AE00A4C8F9 /* BrowseController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrowseController.h; sourceTree = "<group>"; };
+		E22A82DA194AF2AE00A4C8F9 /* BrowseController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrowseController.m; sourceTree = "<group>"; };
 		E22A82E9194AF30000A4C8F9 /* FileListViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileListViewCell.h; sourceTree = "<group>"; };
 		E22A82EA194AF30000A4C8F9 /* FileListViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileListViewCell.m; sourceTree = "<group>"; };
 		E22A82EB194AF30000A4C8F9 /* ImageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageViewController.h; sourceTree = "<group>"; };
@@ -70,7 +78,6 @@
 		E22A82ED194AF30000A4C8F9 /* FileListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileListViewController.h; sourceTree = "<group>"; };
 		E22A82EE194AF30000A4C8F9 /* FileListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileListViewController.m; sourceTree = "<group>"; };
 		E22A8305194AF34B00A4C8F9 /* Indicator@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Indicator@2x.png"; sourceTree = "<group>"; };
-		E23F27FE194F14E400E1E89E /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		E28E53BB1A1F78AE0054967A /* CloudStatus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CloudStatus.h; sourceTree = "<group>"; };
 		E291ED351A13D28700A552D6 /* LS_Alert@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "LS_Alert@2x.png"; sourceTree = "<group>"; };
 		E291ED361A13D28700A552D6 /* LS_Audio@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "LS_Audio@2x.png"; sourceTree = "<group>"; };
@@ -92,8 +99,17 @@
 		E291ED461A13D28700A552D6 /* LS_Spinner@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "LS_Spinner@2x.png"; sourceTree = "<group>"; };
 		E291ED471A13D28700A552D6 /* LS_Upload@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "LS_Upload@2x.png"; sourceTree = "<group>"; };
 		E291ED481A13D28700A552D6 /* LS_Video@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "LS_Video@2x.png"; sourceTree = "<group>"; };
+		E2BC16E51CC4D33300214CFB /* StatusController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusController.swift; sourceTree = "<group>"; };
+		E2BC16E71CC4D61700214CFB /* led.yellow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = led.yellow.png; sourceTree = "<group>"; };
+		E2BC16E81CC4D61700214CFB /* led.gray.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = led.gray.png; sourceTree = "<group>"; };
+		E2BC16E91CC4D61700214CFB /* led.green.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = led.green.png; sourceTree = "<group>"; };
+		E2BC16EA1CC4D61700214CFB /* led.red.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = led.red.png; sourceTree = "<group>"; };
+		E2BC16EF1CC4D67300214CFB /* UnitTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnitTests.swift; sourceTree = "<group>"; };
+		E2BC16F11CC4D91700214CFB /* TestItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestItem.swift; sourceTree = "<group>"; };
+		E2BC16F31CC61F1600214CFB /* image.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = image.jpg; sourceTree = "<group>"; };
 		E2C36E951BEA4DA800B9D2C6 /* OrangeCloudSDK-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OrangeCloudSDK-Bridging-Header.h"; sourceTree = "<group>"; };
-		E2C36E961BEA4DA800B9D2C6 /* SwiftTestController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftTestController.swift; sourceTree = "<group>"; };
+		E2C36E961BEA4DA800B9D2C6 /* SwiftBrowseController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftBrowseController.swift; sourceTree = "<group>"; };
+		E2D6AFF61CCE4E09000D7E17 /* trash@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "trash@2x.png"; sourceTree = "<group>"; };
 		E2E23E1D1A07DD3600F79394 /* OIDCManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OIDCManager.h; sourceTree = "<group>"; };
 		E2E23E1E1A07DD3600F79394 /* OIDCManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OIDCManager.m; sourceTree = "<group>"; };
 		E2E23E1F1A07DD3600F79394 /* CloudConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudConfig.h; sourceTree = "<group>"; };
@@ -103,6 +119,7 @@
 		E2E23E231A07DD3600F79394 /* CloudConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CloudConnection.m; sourceTree = "<group>"; };
 		E2E23E241A07DD3600F79394 /* CloudManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudManager.h; sourceTree = "<group>"; };
 		E2E23E251A07DD3600F79394 /* CloudManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CloudManager.m; sourceTree = "<group>"; };
+		E2F8C1321CD880F400E10576 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -149,15 +166,13 @@
 		E22A82B0194AF24600A4C8F9 /* OrangeCloudSample */ = {
 			isa = PBXGroup;
 			children = (
-				E23F27FE194F14E400E1E89E /* README */,
+				E2F8C1321CD880F400E10576 /* README.md */,
 				E20028741A5AF918007A5997 /* LICENCE */,
 				E22A8300194AF34000A4C8F9 /* images */,
 				E22A82B9194AF24600A4C8F9 /* AppDelegate.h */,
 				E22A82BA194AF24600A4C8F9 /* AppDelegate.m */,
 				E2C36E951BEA4DA800B9D2C6 /* OrangeCloudSDK-Bridging-Header.h */,
-				E2C36E961BEA4DA800B9D2C6 /* SwiftTestController.swift */,
-				E22A82D9194AF2AE00A4C8F9 /* CloudTestViewController.h */,
-				E22A82DA194AF2AE00A4C8F9 /* CloudTestViewController.m */,
+				E2BC16E41CC4D30200214CFB /* Status */,
 				E22A82E5194AF2C800A4C8F9 /* Navigation */,
 				E22A82F3194AF31600A4C8F9 /* Cloud API */,
 				E22A82BC194AF24600A4C8F9 /* Images.xcassets */,
@@ -181,6 +196,9 @@
 		E22A82E5194AF2C800A4C8F9 /* Navigation */ = {
 			isa = PBXGroup;
 			children = (
+				E2C36E961BEA4DA800B9D2C6 /* SwiftBrowseController.swift */,
+				E22A82D9194AF2AE00A4C8F9 /* BrowseController.h */,
+				E22A82DA194AF2AE00A4C8F9 /* BrowseController.m */,
 				E22A82E9194AF30000A4C8F9 /* FileListViewCell.h */,
 				E22A82EA194AF30000A4C8F9 /* FileListViewCell.m */,
 				E22A82EB194AF30000A4C8F9 /* ImageViewController.h */,
@@ -225,8 +243,24 @@
 				E291ED471A13D28700A552D6 /* LS_Upload@2x.png */,
 				E291ED481A13D28700A552D6 /* LS_Video@2x.png */,
 				E22A8305194AF34B00A4C8F9 /* Indicator@2x.png */,
+				E2BC16E71CC4D61700214CFB /* led.yellow.png */,
+				E2BC16E81CC4D61700214CFB /* led.gray.png */,
+				E2BC16E91CC4D61700214CFB /* led.green.png */,
+				E2BC16EA1CC4D61700214CFB /* led.red.png */,
+				E2BC16F31CC61F1600214CFB /* image.jpg */,
+				E2D6AFF61CCE4E09000D7E17 /* trash@2x.png */,
 			);
 			name = images;
+			sourceTree = "<group>";
+		};
+		E2BC16E41CC4D30200214CFB /* Status */ = {
+			isa = PBXGroup;
+			children = (
+				E2BC16E51CC4D33300214CFB /* StatusController.swift */,
+				E2BC16EF1CC4D67300214CFB /* UnitTests.swift */,
+				E2BC16F11CC4D91700214CFB /* TestItem.swift */,
+			);
+			name = Status;
 			sourceTree = "<group>";
 		};
 		E2E23E2B1A07DD4200F79394 /* Cloud utils */ = {
@@ -301,12 +335,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E23F27FF194F14E400E1E89E /* README in Resources */,
+				E2BC16EE1CC4D61700214CFB /* led.red.png in Resources */,
 				E291ED4B1A13D28700A552D6 /* LS_Cancel@2x.png in Resources */,
 				E291ED581A13D28700A552D6 /* LS_Settings@2x.png in Resources */,
 				E291ED591A13D28700A552D6 /* LS_Share@2x.png in Resources */,
+				E2BC16EC1CC4D61700214CFB /* led.gray.png in Resources */,
 				E22A82B5194AF24600A4C8F9 /* InfoPlist.strings in Resources */,
 				E291ED4D1A13D28700A552D6 /* LS_Connect1@2x.png in Resources */,
+				E2D6AFF71CCE4E09000D7E17 /* trash@2x.png in Resources */,
+				E2BC16EB1CC4D61700214CFB /* led.yellow.png in Resources */,
+				E2BC16ED1CC4D61700214CFB /* led.green.png in Resources */,
 				E20028751A5AF918007A5997 /* LICENCE in Resources */,
 				E291ED4F1A13D28700A552D6 /* LS_CreateDir@2x.png in Resources */,
 				E291ED561A13D28700A552D6 /* LS_Mail@2x.png in Resources */,
@@ -326,6 +364,7 @@
 				E22A82BD194AF24600A4C8F9 /* Images.xcassets in Resources */,
 				E22A830E194AF34B00A4C8F9 /* Indicator@2x.png in Resources */,
 				E291ED531A13D28700A552D6 /* LS_Folder@2x.png in Resources */,
+				E2BC16F41CC61F1600214CFB /* image.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,14 +375,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E2BC16F21CC4D91700214CFB /* TestItem.swift in Sources */,
 				E22A82F0194AF30000A4C8F9 /* ImageViewController.m in Sources */,
 				E2E23E281A07DD3600F79394 /* CloudItem.m in Sources */,
 				E22A82EF194AF30000A4C8F9 /* FileListViewCell.m in Sources */,
 				E22A82F1194AF30000A4C8F9 /* FileListViewController.m in Sources */,
-				E22A82DB194AF2AE00A4C8F9 /* CloudTestViewController.m in Sources */,
+				E22A82DB194AF2AE00A4C8F9 /* BrowseController.m in Sources */,
 				E2E23E271A07DD3600F79394 /* OIDCManager.m in Sources */,
 				E22A82BB194AF24600A4C8F9 /* AppDelegate.m in Sources */,
-				E2C36E971BEA4DA800B9D2C6 /* SwiftTestController.swift in Sources */,
+				E2C36E971BEA4DA800B9D2C6 /* SwiftBrowseController.swift in Sources */,
+				E2BC16E61CC4D33300214CFB /* StatusController.swift in Sources */,
+				E2BC16F01CC4D67300214CFB /* UnitTests.swift in Sources */,
 				E2E23E2A1A07DD3600F79394 /* CloudManager.m in Sources */,
 				E22A82B7194AF24600A4C8F9 /* main.m in Sources */,
 				E2E23E291A07DD3600F79394 /* CloudConnection.m in Sources */,
@@ -450,7 +492,7 @@
 				INFOPLIST_FILE = "CloudMe/OrangeCloudSDK-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "net.mobixel.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_BUNDLE_IDENTIFIER = net.mobixel.OCCStatus;
 				PRODUCT_NAME = OrangeCloudSDK;
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "CloudMe/OrangeCloudSDK-Bridging-Header.h";
@@ -473,7 +515,7 @@
 				INFOPLIST_FILE = "CloudMe/OrangeCloudSDK-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "net.mobixel.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_BUNDLE_IDENTIFIER = net.mobixel.OCCStatus;
 				PRODUCT_NAME = OrangeCloudSDK;
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "CloudMe/OrangeCloudSDK-Bridging-Header.h";

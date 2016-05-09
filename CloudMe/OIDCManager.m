@@ -79,7 +79,7 @@ static NSString * kAuthenticationRevoked = @"authenticationRevokedKey";
         // Custom initialization
         self.client_id = appKey;
         self.client_secret = appSecret;
-        self.redirect_uri = redirectURI;
+        self.redirect_uri = [self consolidateURL:redirectURI];
         self.authentServer = @"https://api.orange.com";  // prod
         self.authentEndpoint = @"/oauth/v2/authorize";
         self.tokenEndpoint = @"/oauth/v2/token";
@@ -112,7 +112,7 @@ static NSString * kAuthenticationRevoked = @"authenticationRevokedKey";
     if ((self.scopes & GrantScopeUserDetails) != 0) {
         result = [result stringByAppendingString:@"+details"];
     }
-    if ((self.scopes & GrantScopeOfflineAcess) != 0) {
+    if ((self.scopes & GrantScopeOfflineAccess) != 0) {
         result = [result stringByAppendingString:@"+offline_access"];
     }
     if ((self.scopes & GrantScopeFullRead) != 0) {
@@ -143,7 +143,7 @@ static NSString * kAuthenticationRevoked = @"authenticationRevokedKey";
         self.prompt = @"none";
     }
     if (self.useRefreshToken && self.refreshToken == nil) {
-        [self addScope:GrantScopeOfflineAcess];
+        [self addScope:GrantScopeOfflineAccess];
     }
     NSString * urlString = [NSString stringWithFormat:@"%@%@?", self.authentServer, self.authentEndpoint]; // create the full url like http://server/path?
     urlString = [urlString stringByAppendingFormat:@"scope=%@", [self stringFromScopes]];
@@ -200,7 +200,7 @@ NSString* encodeToPercentEscapeString(NSString *string) {
  */
 
 - (void) displayLoginFrom:(UIViewController*)parentController completion:(AuthenticationCompletion)completion {
-    NSLog (@"displayLoginFrom inwebview: %d", self.forceAuthentInWebView);
+    //NSLog (@"displayLoginFrom inwebview: %d", self.forceAuthentInWebView);
     asyncCompletion = completion; // record the block to call back when asynchronous login is done
     if (self.forceAuthentInWebView || [self.redirect_uri hasPrefix:@"http://"] || [self.redirect_uri hasPrefix:@"https://"]) {
         NSURLRequest * request = [NSURLRequest requestWithURL:[NSURL URLWithString:[self createAuthenticationUrlStringWithConsent:YES]]];
@@ -211,7 +211,11 @@ NSString* encodeToPercentEscapeString(NSString *string) {
             [self.view addSubview:self.webView];
         }
         [self.webView loadRequest:request];
-        [parentController presentViewController:self animated:YES completion:^{ }];
+        
+        if (self.presentingViewController == NULL) {
+            [parentController presentViewController:self animated:YES completion:^{ }];
+        }
+
     } else { // we have a custom scheme, so we must use Safari to handle the authentication process
         // warning: this will obviously work only if the custom scheme used if the redirect uri (ie NOT http) is also declared in THIS app as a supported scheme
         NSString * url = [self createAuthenticationUrlStringWithConsent:YES];
@@ -377,11 +381,20 @@ typedef enum {
     return [self isRedirectURL:url];
 }
 
+- (NSString*) consolidateURL: (NSString*)url {
+    NSArray * array = [url componentsSeparatedByString:@"://"];
+    if (array.count == 2) {
+        return [NSString stringWithFormat:@"%@://%@", [array[0] lowercaseString], array[1]];
+    } else {
+        return url;
+    }
+}
 
 - (BOOL) isRedirectURL:(NSURL*)url {
-    if ([url.absoluteString hasPrefix:self.redirect_uri]) {
+    NSString * targetURL = [self consolidateURL:url.absoluteString];
+    if ([targetURL hasPrefix:self.redirect_uri]) {
         if (TRACE_API_CALL) {
-            NSLog (@"[API CALL] got redirect URI: \n%@", url.absoluteString);
+            NSLog (@"[API CALL] got redirect URI: \n%@", targetURL);
         }
         NSString * authorizationCode = [self extractAuthorizationCodeFromURL:url];
         if (authorizationCode != nil) {
@@ -399,7 +412,6 @@ typedef enum {
         return NO;
     }
 }
-
 
 #pragma mark - UIWebView delegate
 

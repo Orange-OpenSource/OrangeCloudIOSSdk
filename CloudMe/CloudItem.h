@@ -30,7 +30,7 @@ typedef enum {
     CloudTypeVideo,
     /** item is a directory */
     CloudTypeDirectory,
-    /** item is an image/phot file */
+    /** item is a file of unknown type*/
     CloudTypeFile,
 } CloudType;
 
@@ -39,11 +39,11 @@ typedef enum {
  */
 @interface CloudItem : NSObject
 
-/** The unique identifier for this file */
+/** The unique identifier for this file (base64 decadable for debug) */
 @property (nonatomic) NSString * identifier;
 
-/** The readable name of */
-@property (nonatomic, readonly) NSString * name;
+/** The readable name */
+@property (nonatomic) NSString * name;
 
 /** The item type (directory, image, video, ...*/
 @property (nonatomic) CloudType type;

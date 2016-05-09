@@ -14,28 +14,23 @@
  limitations under the License.
  */
 
-
-#import "CloudTestViewController.h"
+#import "BrowseController.h"
 #import "FileListViewController.h"
 
-@interface CloudTestViewController ()
-
-
+@interface BrowseController ()
 @end
 
-@implementation CloudTestViewController
+@implementation BrowseController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
 
     // Create the connection object that will make first user authentication and then open a cloud session
-#warning - please replace with your own credentials
+    // Warning - please replace with your own credentials
     self.cloudManager = [[CloudManager alloc] initWithAppKey:@"your_app_key"
                                                    appSecret:@"your_app_secret"
                                                  redirectURI:@"your_app_callback_URI"];
-    
-    
     
     [self.cloudManager setUseWebView:TRUE];
     [self.cloudManager setForceLogin:TRUE];

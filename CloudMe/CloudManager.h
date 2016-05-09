@@ -25,6 +25,18 @@
 - (nonnull id) initWithStatus:(CloudStatus)status;
 @end
 
+/** The list of available filter options when listing a folder. Only one is applicable at a time. Use FilterTypeAll to get all the files.
+ * @see listFolder
+ */
+typedef NS_ENUM(NSInteger, FilterType) {
+    FilterTypeAll,
+    FilterTypeImage,
+    FilterTypeVideo,
+    FilterTypeAudio,
+    FilterTypeOther
+};
+
+
 /** a block type used when a remote operation has completed. On success, status is statusOK */
 typedef __strong void (^ResultBlock) (CloudStatus status);
 
@@ -44,10 +56,14 @@ typedef __strong void (^DataBlock) ( NSData * _Nullable data, CloudStatus status
 typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
 
 
-/** This class encapsulates the cloud management with method calls, taking care of the low levels aspects, such as authorizations.
- * Due to the asynchronous nature of cloud requests, these methos will generally not return a value directly but rather 
- * will take block as parameter that will be called upon success of failure of the underlying network operation. The status of teh operation is passed 
- * as one of teh block parameter.
+/** This class encapsulates the Orange Cloud Web API with method calls, taking care of the low levels aspects, such as authorizations.
+ * Due to the asynchronous nature of cloud requests, these methosd will generally not return a value directly but rather
+ * will take a block as parameter that will be called upon success or failure of the underlying network operation. The status of the network operation is passed
+ * as one of the block parameter, along with the request result.
+ * A typical usage is to create an instance with the appd ID, secret and callback URL as defined in the Orange Partner portal. Once created this object can open a connection
+ * with the Cloud Api using the connect method. then various methods provide means to interact with teh users cloud storage (folder listing, upload, download, ...)
+ * @note during the connection phase, user is asked for his/her login and password, then is asked to grant the application access to resources. The specification of 
+ * which resource will have granted acess is done through scopes. Please refer to the portal for more information and an up to date list of scopes
  */
 @interface CloudManager : NSObject
 
@@ -56,6 +72,8 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
  the connection is active and that all operations can be performed (list filen upload, donwload, ... */
 @property (nonatomic, readonly) BOOL isConnected;
 
+/** This is the token used to retrieve */
+@property (nonatomic) NSString * _Nullable token;
 
 /** The network sessions timeout, in case you want to adjust it for special purposes. Default value is 60 seconds */
 @property (nonatomic) CGFloat timeout;
@@ -74,8 +92,6 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
  */
 - (id _Nonnull) initWithAppKey:(NSString * _Nonnull)appKey appSecret:(NSString*_Nonnull) appSecret redirectURI:(NSString*_Nonnull)redirectURI;
 
-
-
 /** Add a scope (i.e. feature) to the list of permissions the user must grant access.
  * The defaut scopes are OpenID and Cloud, to enable connection with user login/password and access to the private part of 
  * the cloud the app is allowed to read and write.
@@ -87,26 +103,29 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
 
 
 /** Use this method to configure the connection behavior when your application has been registered with offline access. In this case you should call this method with YES.
- * This wil result in requesting a special token that can be reused for following connections.
+ * This wil result in requesting a special token that can be reused for subsequent connections.
  * @warning this method must be called before openSessionFrom:
  */
 - (void) setUseRefreshToken:(BOOL) useRefreshToken;
 
 
-/** Use this method when you want to force display of the authentication page.
+/** Use this method when you want to force display of the authentication page. User will have to enter his/her credentials during the connect step.
+ * @note default value is NO
  * @warning this method must be called before openSessionFrom:
  */
 - (void) setForceLogin:(BOOL) forceLogin;
 
 
-/** Use this method when you want to force display of the consent page.
+/** Use this method when you want to force display of the consent page. User will have to give his/her consent during the connect step.
  * @warning this method must be called before openSessionFrom:
+ * @note default value is NO
  */
 - (void) setForceConsent:(BOOL) forceConsent;
 
 
 /** Use this method when you want to force display the login page in a web view instead of calling the native web browser. This is useful only if your redirect uri
  * is not a custom scheme your app has registered.
+ * @note default value is NO
  * @warning this method must be called before openSessionFrom:
  */
 - (void) setUseWebView:(BOOL) useWebView;
@@ -116,8 +135,7 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
  * when either the session was successfully open or failed. The authentication phase is auomatically handled during this call by either asking
  * user credentials or resuing stored persistents tokens.
  * @param parentController a valid UIViewController from which a webview can be open, if needed
- * @param success a block of code called when the session is open.
- * @param failure a block of code called when the session failed.
+ * @param result a block of code called when the session is open or failed. The status of the connection is passed as the parameter
  *
  @code
  [self.cloudSession openSessionFrom:rootController result:^(CloudStatus status) {
@@ -133,13 +151,19 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
 - (void) openSessionFrom:(UIViewController* _Nonnull) parentController result:(ResultBlock _Nonnull)result;
 
 
-/** close the current cloud session. You will need to call openSessionFrom: to open a new session with either the same or another user*/
+/** Close the current cloud session. You will need to call openSessionFrom: again to open a new session with either the same or another user.
+ * @note Despite the REST API is stateless, and thus have no close verb, you may need to ensure, in your application, that the user has been disconnect.
+ * This is achieved with this utility method.
+ */
 - (void) logout;
 
 /** Return whether the url is compatible with the current authent and if so, continue the connection process.
- * It is typically called from AppDelegate application:openURL:sourceApplication:annotation:
- * @param a url that triggered
- * @return YES if the parameter is compatible with the actual authentication process
+ * It is typically called from AppDelegate application:openURL:sourceApplication:annotation: When this method returns YES, a token has been extracted 
+ * from the url and your appication can start access teh user's cloud.
+ * @param url the url that triggered activation of the application from an external process, typically Safari.
+ * @note You must have added a custom scheme management in your application and used it as the callback URL in order to use this mechanism.
+ * @see setUseWebView:
+ * @return YES if the url is compatible with the actual authentication process and a token has been successfully extracted
  */
 - (BOOL)handleOpenURL:(NSURL * _Nonnull)url;
 
@@ -171,11 +195,32 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
  */
 - (void)rootFolder:(FileInfoBlock _Nonnull)success;
 
-/** List the content of the root . You must call this method first to be able to access to cloud information. No parameter is returned, rather a bloc of code is called
+/** List the content of a folder. You must call this method first to be able to access to cloud information. No parameter is returned, rather a bloc of code is called
  * when either the session was successfully open or failed.
  * @param folderCloudItem the cloud item of a folder, previously retrieved from the cloud, with a previous call to this listFolder method. if @c folderID is nil, the root folder is listed.
+ * @param restrictedMode if true, the application folder will be considered as the root folder, even in full mode.
+ * @param showThumbnails if true, the response will contain the thumbnail/preview/download urls for every listed file.
+ * @param filter if not FilterTypeAll, restricts the result to a specified universe. See filterType for possible values.
+ * @param flat if true, the folder will be browsed recursively and the full content will be returned.
+ * @param tree if true, only subfolders will be returned.
+ * @param limit specifies the maximum number of elements to be listed. No limit is specified with 0.
+ * @param offset Specifies the offset of the first element to be listed. Typically use 0 if no limits are specified.
  * @param result a block of code called with the list of files contained in the folder and StatusOK, or nil and the error code if a problem occurred.
- * @note You probably need to first get the root folder content, using nil as the folderID. Then you can browse recursively the user file tree using.
+ * @note You probably need to first get the root folder content, using nil as the folderID. Then you can browse recursively the user file tree using this method.
+ */
+- (void)listFolder:(CloudItem * _Nonnull)folderCloudItem
+    restrictedMode:(BOOL)restrictedMode
+    showThumbnails:(BOOL)showThumbnails
+            filter:(FilterType)filter
+              flat:(BOOL)flat
+              tree:(BOOL)tree
+             limit:(int)limit
+             offset:(int)offset
+            result:(ListFolderBlock _Nonnull)result;
+
+/** Convenient method to list a folder with default option values :
+ * restrictedMode, showThumbnails, flat, tree are false, filter is FilterTypeAll, limit and offset are zero
+ * @warning the download url is not fetched using this set of default parameters. This may have an impact on existing code. You should probably use the other listFolder call with showThumnails set to TRUE. 
  */
 - (void)listFolder:(CloudItem* _Nonnull)folderCloudItem result:(ListFolderBlock _Nonnull)result;
 
@@ -230,7 +275,7 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
  * @note The parent folder identifier is typically retreived with a listFolder call.
  * @param folderName the name of the folder to be created.
  * @param parentCloudItem the cloud item of the folder to be created.
- * @param result a block of code called with the new dfolder info and StatusOK, or nil and the error code if a problem occurred.
+ * @param result a block of code called with the new folder info and StatusOK, or nil and the error code if a problem occurred.
  */
 - (void) createFolder:(NSString*_Nonnull)folderName parent:(CloudItem*_Nonnull)parentCloudItem result:(FileInfoBlock _Nonnull)result;
 
@@ -251,6 +296,30 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
  */
 - (void) getFileContent:(CloudItem * _Nonnull)cloudFile result:(DataBlock _Nonnull)result;
 
+/** Rename a file or a folder
+ * @param cloudFile the cloud file object to rename.
+ * @param newName the new name to use for the cloud object
+ * @param result a block of code called with the new file/folder info and StatusOK, or nil and the error code if a problem occurred.
+ * @warning the id of renamed the file will have probably changed
+ */
+- (void) rename :(CloudItem * _Nonnull)cloudFile newName:(NSString * _Nonnull)newName result:(FileInfoBlock _Nonnull)result;
+
+/** Move a file or a folder
+ * @param cloudFile the cloud file object to rename.
+ * @param destination the cloud item for the destination
+ * @param result a block of code called with the new file/folder info and StatusOK, or nil and the error code if a problem occurred.
+ * @warning the id of renamed the file will have probably changed
+ */
+- (void) move :(CloudItem * _Nonnull)cloudFile destination:(CloudItem * _Nonnull)destination result:(FileInfoBlock _Nonnull)result;
+
+/** Copy a file or a folder
+ * @param cloudFile the cloud file object to rename.
+ * @param destination the cloud item that will contain the copy
+ * @param result a block of code called with the new file/folder info and StatusOK, or nil and the error code if a problem occurred.
+ * @warning the id of renamed the file will have probably changed
+ */
+- (void) copy :(CloudItem * _Nonnull)cloudFile destination:(CloudItem * _Nonnull)destination result:(FileInfoBlock _Nonnull)result;
+
 /** Upload data content in a new file inside a folder
  * @param data the data to upload. This can be arbitrary data, like text or binary image compressed data.
  * @param filename the name of file that will be created and that will contain data.
@@ -258,7 +327,7 @@ typedef __strong void (^FreeSpaceBlock) (long size, CloudStatus status);
  * @param progress a block of code called whenever a chunk of data has been uploaded. The parameter is teh download percentage, from 0 to 1.
  * @param result a block of code called when data has been succesfully uploaded or when a problem occurred.
  */
-- (void) uploadData:(NSData*_Nonnull)data filename:(NSString*_Nonnull)filename folderID:(NSString*_Nonnull)folderID progress:(ProgressBlock _Nonnull)progress result:(FileInfoBlock _Nonnull)result;
+- (void) uploadData:(NSData*_Nonnull)data filename:(NSString*_Nonnull)filename folderID:(NSString*_Nonnull)folderID progress:(ProgressBlock _Nullable)progress result:(FileInfoBlock _Nonnull)result;
 
 /** Delete a folder and all its files and subfolders. You should really pay attention when calling this method as files will be permanentely deleted.
  * @param folderCloudItem the cloudItem of the folder that is to be deleted.
